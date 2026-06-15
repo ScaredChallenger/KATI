@@ -334,10 +334,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // --- SUPABASE CONFIGURATION ---
-        // TODO: Replace with your actual Project URL and Anon Key from Supabase Dashboard
         const SUPABASE_URL = 'https://pyazxjshahhqslhsafli.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5YXp4anNoYWhocXNsaHNhZmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAzMzYsImV4cCI6MjA5NzA4NjMzNn0.Muq2wy7hWGioFO886xNBt5GIcqS0osIi4Qad-eTkOOs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error("Supabase SDK tidak ditemukan! Pastikan koneksi internet stabil dan CDN tidak diblokir.");
+            }
+        } catch (e) {
+            console.error("Gagal menginisialisasi Supabase:", e);
+        }
 
         // Animasi Progress Bar
         const progressBarWrapper = document.getElementById('progress-bar-wrapper');
@@ -381,6 +390,11 @@
                 return false;
             }
 
+            if (!supabaseClient) {
+                alert("Koneksi ke Supabase gagal diinisialisasi. Silakan refresh halaman.");
+                return false;
+            }
+
             try {
                 simulateProgressBar();
 
@@ -388,7 +402,7 @@
                 const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
                 const filePath = `${Date.now()}_${safeFileName}`;
 
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('certificates')
                     .upload(filePath, file, {
                         cacheControl: '3600',

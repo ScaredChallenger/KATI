@@ -21,47 +21,35 @@
             line-height: 1;
         }
 
+        :root {
+            --on-surface: #e5e2e1;
+            --on-surface-variant: #b9cacb;
+            --background: #000000;
+            --surface-container: #161616;
+            --outline-variant: #262626;
+            --primary-fixed-dim: #00dbe9;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-specular: rgba(255, 255, 255, 0.12);
+            --glass-shadow: rgba(0, 0, 0, 0.6);
+        }
+
         body {
-            background-color: #0A0A0A;
-            color: #e5e2e1;
+            background-color: var(--background);
+            color: var(--on-surface);
             overflow-x: hidden;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.01));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-        }
-
-        .neon-glow-cyan {
-            box-shadow: 0 0 20px rgba(0, 219, 233, 0.05);
-        }
-
-        @keyframes flow {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        .light-trail {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: -1;
-            filter: blur(120px);
-            opacity: 0.15;
-            background: radial-gradient(circle at 20% 30%, #00dbe9 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, #7d01b1 0%, transparent 40%);
-            animation: flow 20s linear infinite;
+            box-shadow: 0 8px 32px 0 var(--glass-shadow), 
+                        inset 0 1px 0px var(--glass-specular),
+                        inset 0 -1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .progress-gradient {
@@ -85,36 +73,36 @@
                         "on-secondary-fixed-variant": "#7200a3",
                         "on-primary-fixed": "#002022",
                         "outline": "#849495",
-                        "on-background": "#e5e2e1",
-                        "primary-fixed-dim": "#00dbe9",
-                        "surface-dim": "#131313",
+                        "on-background": "var(--on-surface)",
+                        "primary-fixed-dim": "var(--primary-fixed-dim)",
+                        "surface-dim": "var(--background)",
                         "tertiary-fixed-dim": "#e9c400",
                         "on-tertiary-fixed-variant": "#554600",
                         "on-primary-container": "#006970",
-                        "on-surface": "#e5e2e1",
-                        "outline-variant": "#3b494b",
-                        "background": "#131313",
+                        "on-surface": "var(--on-surface)",
+                        "outline-variant": "var(--outline-variant)",
+                        "background": "var(--background)",
                         "tertiary-fixed": "#ffe171",
                         "inverse-on-surface": "#313030",
                         "secondary-fixed": "#f6d9ff",
                         "primary-fixed": "#7df4ff",
-                        "surface-container-low": "#1c1b1b",
+                        "surface-container-low": "var(--background)",
                         "on-secondary": "#510074",
-                        "surface-container": "#201f1f",
+                        "surface-container": "var(--surface-container)",
                         "secondary": "#e9b3ff",
-                        "inverse-surface": "#e5e2e1",
+                        "inverse-surface": "var(--on-surface)",
                         "on-primary": "#00363a",
                         "tertiary": "#fff5dd",
                         "on-tertiary-container": "#705d00",
                         "primary-container": "#00f0ff",
-                        "surface-container-highest": "#353534",
-                        "surface-container-high": "#2a2a2a",
+                        "surface-container-highest": "var(--surface-container)",
+                        "surface-container-high": "var(--surface-container)",
                         "secondary-fixed-dim": "#e9b3ff",
                         "on-tertiary": "#3b2f00",
                         "on-primary-fixed-variant": "#004f54",
                         "on-secondary-container": "#e5a9ff",
                         "on-secondary-fixed": "#310048",
-                        "on-surface-variant": "#b9cacb",
+                        "on-surface-variant": "var(--on-surface-variant)",
                         "surface-variant": "#353534",
                         "on-error": "#690005",
                         "surface-tint": "#00dbe9",
@@ -163,11 +151,19 @@
         }
     </script>
 </head>
-
+ 
 <body class="min-h-screen">
-    <!-- Atmospheric Background -->
-    <div class="light-trail"></div>
     <!-- Navigation Shell -->
+    <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md" style="border-bottom: 1px solid var(--glass-border);">
+        <div class="max-w-7xl mx-auto px-container-margin h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg">
+                    <span class="material-symbols-outlined font-bold">verified</span>
+                </div>
+                <span class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
+            </div>
+        </div>
+    </nav>
 
     <main class="max-w-7xl mx-auto pt-[120px] pb-stack-lg px-container-margin">
         <!-- Header Section -->
@@ -180,25 +176,69 @@
         </header>
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            <!-- Left: Upload Section (8 cols) -->
-            <div class="lg:col-span-8 flex flex-col gap-stack-md">
+            <!-- Left Sidebar: Profile & Session Info (3 cols) -->
+            <div class="lg:col-span-3 flex flex-col gap-stack-md">
+                <div class="glass-card p-6 flex flex-col gap-6" style="background: rgba(255, 255, 255, 0.03);">
+                    <!-- Profile Header -->
+                    <div class="flex flex-col items-center text-center pb-6 border-b border-[rgba(255,255,255,0.08)]">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg mb-4 text-2xl font-bold" id="profile-initial">
+                            U
+                        </div>
+                        <h3 class="font-headline-md text-[18px] text-on-surface font-semibold truncate w-full" id="profile-name">Username</h3>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mt-1" id="profile-nim">NIM: 000000000</p>
+                    </div>
+                    
+                    <!-- Session Info / Details -->
+                    <div class="flex flex-col gap-3 font-label-sm text-label-sm text-on-surface-variant">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-[#00dbe9]">verified_user</span>
+                            <span>Status: Authenticated</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-[#00dbe9]">schedule</span>
+                            <span>Session: Active</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <button id="logout-btn" class="w-full mt-2 py-3 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle: Upload Section (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-stack-md">
                 <!-- Upload Zone -->
                 <div class="glass-card dashed-border h-[400px] flex flex-col items-center justify-center p-stack-lg group cursor-pointer hover:bg-[rgba(255,255,255,0.08)] transition-all duration-500"
                     id="drop-zone" style="background: rgba(255, 255, 255, 0.05);">
 
                     <!-- Preview Container -->
                     <div id="preview-container"
-                        class="hidden flex-col items-center justify-center w-full h-full pointer-events-none">
+                        class="hidden flex-col items-center justify-center w-full h-full">
                         <img id="file-preview-img" src="" alt="File Preview"
-                            class="max-h-[200px] max-w-full rounded-lg mb-4 object-contain shadow-lg hidden">
+                            class="max-h-[160px] max-w-full rounded-lg mb-4 object-contain shadow-lg hidden">
                         <span id="file-preview-icon"
                             class="material-symbols-outlined text-[80px] text-primary mb-4 hidden"
                             style="font-variation-settings: 'FILL' 1;">description</span>
                         <p id="file-preview-name"
-                            class="font-headline-md text-headline-md text-on-surface text-center truncate w-full px-4">
+                            class="font-headline-md text-headline-md text-on-surface text-center truncate w-full px-4 max-w-[300px]">
                         </p>
                         <p id="file-preview-size"
-                            class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 mt-1"></p>
+                            class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 mt-1 mb-6"></p>
+                        
+                        <!-- Action Buttons Inside Box -->
+                        <div class="flex items-center gap-4 z-10" onclick="event.stopPropagation()">
+                            <button id="cancel-upload-btn"
+                                class="px-6 py-2 rounded-full border border-[rgba(255,255,255,0.2)] text-on-surface font-label-md text-label-md hover:bg-white hover:text-black transition-all duration-300">
+                                Cancel
+                            </button>
+                            <button id="upload-btn"
+                                class="px-8 py-2 rounded-full bg-primary text-on-primary-fixed font-bold font-label-md text-label-md hover:shadow-[0_0_20px_rgba(219,252,255,0.3)] transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Upload
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Default Upload Icon Container -->
@@ -237,23 +277,6 @@
                             style="width: 0%;"></div>
                     </div>
                 </div>
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between gap-stack-sm pt-base">
-                    <!-- Supabase Auth (Not Needed for Anon Uploads) -->
-                    <div class="flex items-center gap-2">
-                    </div>
-
-                    <div class="flex items-center gap-stack-sm ml-auto">
-                        <button id="cancel-upload-btn"
-                            class="px-8 py-3 rounded-full border border-[rgba(255,255,255,0.2)] text-on-surface font-label-md text-label-md hover:bg-white hover:text-black transition-all duration-300 hidden">
-                            Cancel
-                        </button>
-                        <button id="upload-btn"
-                            class="px-10 py-3 rounded-full bg-primary text-on-primary-fixed font-bold font-label-md text-label-md hover:shadow-[0_0_20px_rgba(219,252,255,0.3)] transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Upload
-                        </button>
-                    </div>
-                </div>
             </div>
             <!-- Right: History/Sidebar (4 cols) -->
             <div class="lg:col-span-4 flex flex-col gap-stack-md">
@@ -263,67 +286,12 @@
                 </div>
                 <!-- History Grid -->
                 <div class="flex flex-col gap-4">
-                    <!-- Certificate Card 1 -->
-                    <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group"
-                        style="--mouse-x: 208.671875px; --mouse-y: 1.234375px; background: rgba(255, 255, 255, 0.05);">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container flex-shrink-0">
-                                <img alt="MIT Logo" class="w-full h-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida/AP1WRLvDoKQebhS4SXQF8LGgH4lh6n6FGr3MlZXMEe6fWZrqmUahmAom-cji59Dalcyu_1XfsIqIuFlQ6gf7sQZasDrJJ3KkPg-MYgEmAr3JnmYPOQVVScTjzGWBwYrvfw5V-vuIY3dU5qOjEUMnmD6bvlz6vVoivW36qdnd01qJ59DoHCy8seAgXYV8JAQNLPKZaalFWBG9KUGqHNZ2RVj-X7VmnnMBMP0BV2J_DgzFASe15J0YyN4JMapIfthz">
-                            </div>
-                            <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-1">
-                                    <h4 class="font-label-md text-label-md text-on-surface">Data Science Professional
-                                    </h4>
-                                    <span
-                                        class="px-2 py-0.5 rounded bg-primary-container/20 text-primary-fixed-dim font-label-sm text-[10px] uppercase">Verified</span>
-                                </div>
-                                <p class="font-label-sm text-label-sm text-on-surface-variant">MIT xPro • Oct 12, 2023
-                                </p>
-                            </div>
-                        </div>
+                    <!-- Empty State Placeholder -->
+                    <div id="empty-history-state" class="glass-card p-6 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] min-h-[200px]" style="background: rgba(255, 255, 255, 0.05);">
+                        <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-3" style="font-variation-settings: 'FILL' 0;">history</span>
+                        <h4 class="font-label-md text-label-md text-on-surface mb-1">No history yet</h4>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant max-w-[200px]">Uploaded certificates will appear here.</p>
                     </div>
-                    <!-- Certificate Card 2 -->
-                    <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group"
-                        style="--mouse-x: 194.671875px; --mouse-y: -0.15625px; background: rgba(255, 255, 255, 0.05);">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container flex-shrink-0">
-                                <img alt="AWS Logo" class="w-full h-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida/AP1WRLusIF8PsMVNlUurD67W0kpQ9KgTmBdrM3r4GQmQ30PUdWStuDfFsHxrlYAfHErqjX6z8xuWqnbkIKkjYXE4V7sGixjtVH_h-aSQ0KBongk6ZKzwGPTmV6ctYwbdl4qgg5A49QKsH8VXBlLWxJrrSx5Hhsn4VTIbuUT71wUxwouIIaWD1J9LlS_uc0sHR_MkOu0V3aJy4bE6BvlsZrIcj9RTm4RIiKn4ePPMY04VYtMkmcogegNMixziHh4">
-                            </div>
-                            <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-1">
-                                    <h4 class="font-label-md text-label-md text-on-surface">Cloud Architect Associate
-                                    </h4>
-                                    <span
-                                        class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-sm text-[10px] uppercase">Processing</span>
-                                </div>
-                                <p class="font-label-sm text-label-sm text-on-surface-variant">Amazon Web Services • Jan
-                                    05, 2024</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Certificate Card 3 -->
-                    <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group"
-                        style="--mouse-x: 267.671875px; --mouse-y: 62.453125px; background: rgba(255, 255, 255, 0.05);">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container flex-shrink-0">
-                                <img alt="Google Logo" class="w-full h-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida/AP1WRLtHZ0v6dFtog50CyJh61nb9UZKBSI38s58waHR3Xpsjk2ImsOXNB8Wbztxz6ng1HJC7mKWwGpx00wk7C4vF3_FyvWI0S9UTQlypczt9o4oOsGuDAynRjURt07JoZnpUmZzQZXF9FeLaFnWELzD_F9LLFVQB2hb3eVd5Z_SXsud-DFkVnIceFsgD6PYk5y2uSemuGDFPIQh2MyoKSgxfVItMvBbo8ZqK-oM_Rw5BzV8S2wilf7AT6Uw74RX1">
-                            </div>
-                            <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-1">
-                                    <h4 class="font-label-md text-label-md text-on-surface">UX Design Specialization
-                                    </h4>
-                                    <span
-                                        class="px-2 py-0.5 rounded bg-primary-container/20 text-primary-fixed-dim font-label-sm text-[10px] uppercase">Verified</span>
-                                </div>
-                                <p class="font-label-sm text-label-sm text-on-surface-variant">Google • Nov 22, 2023</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Upgrade Banner -->
-
                 </div>
             </div>
         </div>
@@ -528,14 +496,33 @@
             btn.disabled = true;
             btn.textContent = "Uploading...";
 
+            if (currentSelectedFile.isMock) {
+                simulateProgressBar();
+                setTimeout(() => {
+                    finishProgressBar();
+                    const fileSizeMB = (currentSelectedFile.size / (1024 * 1024)).toFixed(2);
+                    const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                    injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, document.getElementById('file-preview-img').src);
+                    document.getElementById('cancel-upload-btn').click();
+                    btn.disabled = false;
+                    btn.textContent = "Upload";
+                }, 1500);
+                return;
+            }
+
             const isSaved = await uploadToSupabase(currentSelectedFile);
 
             if (isSaved) {
                 const fileSizeMB = (currentSelectedFile.size / (1024 * 1024)).toFixed(2);
                 const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                
+                let previewDataUrl = '';
+                if (currentSelectedFile.type.startsWith('image/')) {
+                    previewDataUrl = document.getElementById('file-preview-img').src;
+                }
 
                 // Suntik ke UI History
-                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type);
+                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, previewDataUrl);
 
                 // Reset setelah sukses
                 document.getElementById('cancel-upload-btn').click();
@@ -546,27 +533,38 @@
         });
 
         // Render komponen kartu riwayat ke dalam interface
-        function injectCardToHistory(name, size, date, type) {
+        function injectCardToHistory(name, size, date, type, previewDataUrl = '') {
+            const emptyState = document.getElementById('empty-history-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
             let iconName = 'description';
             if (type.includes('image')) iconName = 'image';
             if (type.includes('pdf')) iconName = 'picture_as_pdf';
             if (type.includes('zip') || type.includes('rar')) iconName = 'folder_zip';
 
+            const escapedName = name.replace(/'/g, "\\'");
             const newHistoryCard = `
-        <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group"
-            style="background: rgba(255, 255, 255, 0.05);">
+        <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer"
+            style="background: rgba(255, 255, 255, 0.05);" onclick="loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')">
             <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim">
                     <span class="material-symbols-outlined">${iconName}</span>
                 </div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between mb-1">
-                        <h4 class="font-label-md text-label-md text-on-surface truncate w-40" title="${name}">
+                        <h4 class="font-label-md text-label-md text-on-surface truncate w-32" title="${name}">
                             ${name}
                         </h4>
-                        <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-label-sm text-[10px] uppercase tracking-wider">
-                            Supabase
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-label-sm text-[10px] uppercase tracking-wider">
+                                Supabase
+                            </span>
+                            <button class="text-red-400 hover:text-red-300 transition-colors p-1" onclick="deleteHistoryCard(event, this)">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                        </div>
                     </div>
                     <p class="font-label-sm text-label-sm text-on-surface-variant">
                         ${size} MB • ${date}
@@ -577,6 +575,62 @@
 
             historyContainer.insertAdjacentHTML('afterbegin', newHistoryCard);
             applyGlowEffect(); // Re-apply glow untuk kartu baru
+        }
+
+        // Preview file dari riwayat history
+        function loadHistoryToPreview(name, size, type, previewDataUrl) {
+            // Update UI
+            document.getElementById('default-upload-ui').classList.add('hidden');
+            document.getElementById('preview-container').classList.remove('hidden');
+            document.getElementById('cancel-upload-btn').classList.remove('hidden');
+
+            const nameEl = document.getElementById('file-preview-name');
+            const sizeEl = document.getElementById('file-preview-size');
+            const imgEl = document.getElementById('file-preview-img');
+            const iconEl = document.getElementById('file-preview-icon');
+
+            nameEl.textContent = name;
+            sizeEl.textContent = size + " MB";
+
+            if (type.includes('image') && previewDataUrl) {
+                imgEl.src = previewDataUrl;
+                imgEl.classList.remove('hidden');
+                iconEl.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                iconEl.classList.remove('hidden');
+
+                if (type.includes('pdf')) iconEl.textContent = 'picture_as_pdf';
+                else if (type.includes('zip') || type.includes('rar')) iconEl.textContent = 'folder_zip';
+                else iconEl.textContent = 'description';
+            }
+            
+            // Simpan mock file agar bisa di re-upload
+            currentSelectedFile = {
+                name: name,
+                size: parseFloat(size) * 1024 * 1024,
+                type: type,
+                isMock: true
+            };
+        }
+
+        // Hapus kartu riwayat
+        function deleteHistoryCard(event, element) {
+            event.stopPropagation();
+            const card = element.closest('.glass-card');
+            card.remove();
+            
+            // Tampilkan kembali placeholder kosong jika riwayat habis
+            const historyList = document.querySelector('.lg\\:col-span-4 .flex-col.gap-4');
+            if (historyList && historyList.children.length === 0) {
+                historyList.innerHTML = `
+                    <div id="empty-history-state" class="glass-card p-6 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] min-h-[200px]" style="background: rgba(255, 255, 255, 0.05);">
+                        <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-3" style="font-variation-settings: 'FILL' 0;">history</span>
+                        <h4 class="font-label-md text-label-md text-on-surface mb-1">No history yet</h4>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant max-w-[200px]">Uploaded certificates will appear here.</p>
+                    </div>
+                `;
+            }
         }
 
         // Efek bersinar pada kartu saat dilewati mouse (Estetika UI)
@@ -597,7 +651,34 @@
         }
 
         // Inisialisasi awal saat halaman mendarat
-        window.addEventListener('DOMContentLoaded', applyGlowEffect);
+        window.addEventListener('DOMContentLoaded', () => {
+            applyGlowEffect();
+
+            // Load session data
+            const userName = localStorage.getItem('user_name');
+            const userNim = localStorage.getItem('user_nim');
+
+            // Redirect if not logged in
+            if (!userName || !userNim) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Populate UI
+            document.getElementById('profile-name').textContent = userName;
+            document.getElementById('profile-nim').textContent = 'NIM: ' + userNim;
+            document.getElementById('profile-initial').textContent = userName.charAt(0).toUpperCase();
+
+            // Logout click listener
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('user_name');
+                    localStorage.removeItem('user_nim');
+                    window.location.href = 'index.html';
+                });
+            }
+        });
     </script>
 
 

@@ -158,11 +158,8 @@
     <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md"
         style="border-bottom: 1px solid var(--glass-border);">
         <div class="max-w-7xl mx-auto px-container-margin h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg">
-                    <span class="material-symbols-outlined font-bold">verified</span>
-                </div>
+            <div id="kati-logo" class="flex items-center gap-3 cursor-pointer select-none" title="KATI Logo">
+                <img src="KATI - UPLOUDER.png" alt="KATI Logo" class="w-8 h-8 object-contain invert">
                 <span
                     class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
             </div>
@@ -174,8 +171,7 @@
         <header class="mb-stack-lg flex flex-col gap-base">
             <h1 class="font-headline-lg text-headline-lg text-on-surface">Certificate Hub</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                Securely manage and upload your professional certifications. Our AI-driven verification engine processes
-                and authenticates your documents in real-time.
+                Uploud sertifikat dari ujian Digitalent di kotak uploud dibawah ini, dan pastikan file yang di uploud benar!
             </p>
         </header>
         <!-- Main Content Grid -->
@@ -265,10 +261,6 @@
                         </div>
                         <h2 class="font-headline-md text-headline-md text-on-surface mb-2 pointer-events-none">Drop your
                             certificate here</h2>
-                        <p
-                            class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 pointer-events-none">
-                            Supported formats: All files up to 100MB
-                        </p>
                     </div>
 
                     <input id="file-input" class="hidden" type="file" accept="*/*">
@@ -308,7 +300,8 @@
             </div>
         </div>
     </main>
-    <!-- Footer Shell -->
+
+
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -734,6 +727,23 @@
                     localStorage.removeItem('user_name');
                     localStorage.removeItem('user_nim');
                     window.location.href = 'index.html';
+                });
+            }
+
+            // Easter Egg: Rickroll on 3 clicks (YouTube New Tab)
+            const katiLogo = document.getElementById('kati-logo');
+            if (katiLogo) {
+                let clickCount = 0;
+                let clickTimer;
+                katiLogo.addEventListener('click', () => {
+                    clickCount++;
+                    clearTimeout(clickTimer);
+                    if (clickCount >= 3) {
+                        window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+                        clickCount = 0;
+                    } else {
+                        clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
+                    }
                 });
             }
         });

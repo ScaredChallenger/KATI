@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>KATI-CERTIFIED UPLOUDER - Login</title>
+    <link rel="icon" type="image/png" href="KATI - UPLOUDER.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
         rel="stylesheet">
@@ -133,9 +134,9 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 var(--glass-shadow), 
-                        inset 0 1px 0px var(--glass-specular),
-                        inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px 0 var(--glass-shadow),
+                inset 0 1px 0px var(--glass-specular),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .input-focus-ring:focus-within {
@@ -160,7 +161,7 @@
                 <p class="font-body-md text-body-md text-on-surface-variant">Access your certification vault</p>
             </div>
             <!-- Access Form -->
-            <form class="w-full space-y-stack-md" onsubmit="handleLogin(event)">
+            <form class="w-full space-y-stack-md" onsubmit="handleLogin(event)" novalidate>
                 <!-- Full Name Input -->
                 <div class="space-y-base">
                     <label
@@ -186,9 +187,12 @@
                             data-icon="badge">badge</span>
                         <input id="login-nim"
                             class="w-full bg-transparent border-none text-on-surface pl-12 py-4 focus:ring-0 font-body-md placeholder:text-outline"
-                            maxlength="9" placeholder="Enter your 9-digit NIM" type="text" required>
+                            maxlength="8" placeholder="Enter your 8-digit NIM" type="text" required>
                     </div>
-                    <p class="text-[11px] font-label-sm text-outline ml-1">Enter your 9-digit NIM</p>
+                    <p class="text-[11px] font-label-sm text-outline ml-1">Enter your 8-digit NIM</p>
+                </div>
+                <!-- Error Message Container -->
+                <div id="error-message" class="hidden text-error text-label-md bg-error-container/20 border border-error/50 p-3 rounded-lg text-center font-medium transition-all duration-300">
                 </div>
                 <!-- Submit Button -->
                 <button
@@ -212,18 +216,99 @@
         </div>
     </main>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        function handleLogin(event) {
+        const SUPABASE_URL = 'https://pyazxjshahhqslhsafli.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5YXp4anNoYWhocXNsaHNhZmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAzMzYsImV4cCI6MjA5NzA4NjMzNn0.Muq2wy7hWGioFO886xNBt5GIcqS0osIi4Qad-eTkOOs';
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        async function handleLogin(event) {
             // Menghentikan reload halaman bawaan yang kuno
             event.preventDefault();
 
-            const name = document.getElementById('login-name').value;
-            const nim = document.getElementById('login-nim').value;
+            const name = document.getElementById('login-name').value.trim();
+            const nim = document.getElementById('login-nim').value.trim();
+            const errorMsg = document.getElementById('error-message');
 
-            if (name && nim) {
-                localStorage.setItem('user_name', name);
-                localStorage.setItem('user_nim', nim);
-                window.location.href = 'dashboard.html';
+            // Reset error state
+            errorMsg.classList.add('hidden');
+            errorMsg.textContent = '';
+
+            const isNameEmpty = name === '';
+            const isNimEmpty = nim === '';
+
+            if (isNameEmpty && isNimEmpty) {
+                showError("Harus input nama dan NIM");
+                return;
+            } else if (isNameEmpty) {
+                showError("Silakan input nama");
+                return;
+            } else if (isNimEmpty) {
+                showError("Silakan input NIM");
+                return;
+            }
+
+            const isNameValid = name.length >= 3;
+            const nimRegex = /^[0-9]{8}$/;
+            const isNimValid = nimRegex.test(nim);
+
+            if (!isNameValid && !isNimValid) {
+                showError("Nama dan NIM tidak sesuai format");
+                return;
+            } else if (!isNameValid && isNimValid) {
+                showError("Nama minimal harus 3 karakter");
+                return;
+            } else if (isNameValid && !isNimValid) {
+                showError("NIM harus tepat 8 angka");
+                return;
+            }
+
+            if (!supabaseClient) {
+                showError("Gagal memuat database (Cek koneksi internet).");
+                return;
+            }
+
+            const btn = document.querySelector('button[type="submit"]');
+            const originalBtnText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Verifying...";
+
+            try {
+                // Cek data di tabel students
+                const { data, error } = await supabaseClient
+                    .from('students')
+                    .select('*')
+                    .eq('nim', nim);
+
+                if (error) {
+                    console.error(error);
+                    showError("Terjadi kesalahan sistem saat mengecek database.");
+                } else if (data.length === 0) {
+                    showError("NIM tidak terdaftar di sistem.");
+                } else {
+                    // NIM ditemukan, cek apakah nama cocok (tidak membedakan huruf besar/kecil)
+                    const student = data[0];
+                    if (student.name.trim().toLowerCase() !== name.toLowerCase()) {
+                        showError("NIM benar, tapi nama tidak sesuai database.");
+                    } else {
+                        // Jika valid & cocok
+                        localStorage.setItem('user_name', student.name);
+                        localStorage.setItem('user_nim', student.nim);
+                        window.location.href = 'dashboard.html';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                showError("Gagal menghubungi server database.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalBtnText;
+            }
+
+            function showError(msg) {
+                errorMsg.textContent = msg;
+                errorMsg.classList.remove('hidden');
             }
         }
     </script>

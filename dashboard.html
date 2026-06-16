@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>KATI-CERTIFIED UPLOUDER - Dashboard</title>
+    <link rel="icon" type="image/png" href="KATI - UPLOUDER.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -47,9 +48,9 @@
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            box-shadow: 0 8px 32px 0 var(--glass-shadow), 
-                        inset 0 1px 0px var(--glass-specular),
-                        inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px 0 var(--glass-shadow),
+                inset 0 1px 0px var(--glass-specular),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .progress-gradient {
@@ -151,16 +152,19 @@
         }
     </script>
 </head>
- 
+
 <body class="min-h-screen">
     <!-- Navigation Shell -->
-    <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md" style="border-bottom: 1px solid var(--glass-border);">
+    <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md"
+        style="border-bottom: 1px solid var(--glass-border);">
         <div class="max-w-7xl mx-auto px-container-margin h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg">
                     <span class="material-symbols-outlined font-bold">verified</span>
                 </div>
-                <span class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
+                <span
+                    class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
             </div>
         </div>
     </nav>
@@ -181,13 +185,16 @@
                 <div class="glass-card p-6 flex flex-col gap-6" style="background: rgba(255, 255, 255, 0.03);">
                     <!-- Profile Header -->
                     <div class="flex flex-col items-center text-center pb-6 border-b border-[rgba(255,255,255,0.08)]">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg mb-4 text-2xl font-bold" id="profile-initial">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#00dbe9] to-[#7d01b1] flex items-center justify-center text-white shadow-lg mb-4 text-2xl font-bold"
+                            id="profile-initial">
                             U
                         </div>
-                        <h3 class="font-headline-md text-[18px] text-on-surface font-semibold truncate w-full" id="profile-name">Username</h3>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mt-1" id="profile-nim">NIM: 000000000</p>
+                        <h3 class="font-headline-md text-[18px] text-on-surface font-semibold truncate w-full"
+                            id="profile-name">Username</h3>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mt-1" id="profile-nim">NIM:
+                            000000000</p>
                     </div>
-                    
+
                     <!-- Session Info / Details -->
                     <div class="flex flex-col gap-3 font-label-sm text-label-sm text-on-surface-variant">
                         <div class="flex items-center gap-2">
@@ -199,9 +206,10 @@
                             <span>Session: Active</span>
                         </div>
                     </div>
-                    
+
                     <!-- Logout Button -->
-                    <button id="logout-btn" class="w-full mt-2 py-3 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+                    <button id="logout-btn"
+                        class="w-full mt-2 py-3 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">logout</span>
                         Logout
                     </button>
@@ -215,8 +223,7 @@
                     id="drop-zone" style="background: rgba(255, 255, 255, 0.05);">
 
                     <!-- Preview Container -->
-                    <div id="preview-container"
-                        class="hidden flex-col items-center justify-center w-full h-full">
+                    <div id="preview-container" class="hidden flex-col items-center justify-center w-full h-full">
                         <img id="file-preview-img" src="" alt="File Preview"
                             class="max-h-[160px] max-w-full rounded-lg mb-4 object-contain shadow-lg hidden">
                         <span id="file-preview-icon"
@@ -226,8 +233,9 @@
                             class="font-headline-md text-headline-md text-on-surface text-center truncate w-full px-4 max-w-[300px]">
                         </p>
                         <p id="file-preview-size"
-                            class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 mt-1 mb-6"></p>
-                        
+                            class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 mt-1 mb-6">
+                        </p>
+
                         <!-- Action Buttons Inside Box -->
                         <div class="flex items-center gap-4 z-10" onclick="event.stopPropagation()">
                             <button id="cancel-upload-btn"
@@ -287,10 +295,14 @@
                 <!-- History Grid -->
                 <div class="flex flex-col gap-4">
                     <!-- Empty State Placeholder -->
-                    <div id="empty-history-state" class="glass-card p-6 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] min-h-[200px]" style="background: rgba(255, 255, 255, 0.05);">
-                        <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-3" style="font-variation-settings: 'FILL' 0;">history</span>
+                    <div id="empty-history-state"
+                        class="glass-card p-6 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] min-h-[200px]"
+                        style="background: rgba(255, 255, 255, 0.05);">
+                        <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-3"
+                            style="font-variation-settings: 'FILL' 0;">history</span>
                         <h4 class="font-label-md text-label-md text-on-surface mb-1">No history yet</h4>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant max-w-[200px]">Uploaded certificates will appear here.</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant max-w-[200px]">Uploaded
+                            certificates will appear here.</p>
                     </div>
                 </div>
             </div>
@@ -382,13 +394,19 @@
                 }
 
                 finishProgressBar();
-                return true;
+                
+                // Dapatkan public URL dari Supabase
+                const { data: urlData } = supabaseClient.storage
+                    .from('certificates')
+                    .getPublicUrl(filePath);
+                    
+                return urlData.publicUrl;
 
             } catch (err) {
                 console.error("Upload error:", err);
                 alert("Gagal upload ke Supabase: " + (err.message || "Kesalahan tidak diketahui"));
                 resetProgressBar();
-                return false;
+                return null;
             }
         }
 
@@ -510,19 +528,19 @@
                 return;
             }
 
-            const isSaved = await uploadToSupabase(currentSelectedFile);
+            const publicUrl = await uploadToSupabase(currentSelectedFile);
 
-            if (isSaved) {
+            if (publicUrl) {
                 const fileSizeMB = (currentSelectedFile.size / (1024 * 1024)).toFixed(2);
                 const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-                
-                let previewDataUrl = '';
+
+                let previewUrl = '';
                 if (currentSelectedFile.type.startsWith('image/')) {
-                    previewDataUrl = document.getElementById('file-preview-img').src;
+                    previewUrl = publicUrl; // Simpan URL asli gambar Supabase, bukan base64 yang sangat berat
                 }
 
                 // Suntik ke UI History
-                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, previewDataUrl);
+                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, previewUrl);
 
                 // Reset setelah sukses
                 document.getElementById('cancel-upload-btn').click();
@@ -533,10 +551,27 @@
         });
 
         // Render komponen kartu riwayat ke dalam interface
-        function injectCardToHistory(name, size, date, type, previewDataUrl = '') {
+        function injectCardToHistory(name, size, date, type, previewDataUrl = '', id = null, shouldSave = true) {
             const emptyState = document.getElementById('empty-history-state');
             if (emptyState) {
                 emptyState.remove();
+            }
+
+            if (!id) id = Date.now().toString();
+
+            if (shouldSave) {
+                try {
+                    const userNim = localStorage.getItem('user_nim');
+                    if (userNim) {
+                        const historyKey = 'upload_history_' + userNim;
+                        let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+                        history.unshift({ id, name, size, date, type, previewDataUrl });
+                        localStorage.setItem(historyKey, JSON.stringify(history));
+                    }
+                } catch (e) {
+                    console.warn("Gagal menyimpan ke LocalStorage:", e);
+                    // Error biasanya terjadi jika localStorage penuh karena data base64 (teratasi dengan publicUrl)
+                }
             }
 
             let iconName = 'description';
@@ -549,8 +584,11 @@
         <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer"
             style="background: rgba(255, 255, 255, 0.05);" onclick="loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')">
             <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim">
-                    <span class="material-symbols-outlined">${iconName}</span>
+                <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim relative">
+                    ${type.includes('image') && previewDataUrl 
+                        ? `<img src="${previewDataUrl}" alt="Thumbnail" class="w-full h-full object-cover">`
+                        : `<span class="material-symbols-outlined">${iconName}</span>`
+                    }
                 </div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between mb-1">
@@ -561,7 +599,7 @@
                             <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-label-sm text-[10px] uppercase tracking-wider">
                                 Supabase
                             </span>
-                            <button class="text-red-400 hover:text-red-300 transition-colors p-1" onclick="deleteHistoryCard(event, this)">
+                            <button class="text-red-400 hover:text-red-300 transition-colors p-1" onclick="deleteHistoryCard(event, this, '${id}')">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                         </div>
@@ -604,7 +642,7 @@
                 else if (type.includes('zip') || type.includes('rar')) iconEl.textContent = 'folder_zip';
                 else iconEl.textContent = 'description';
             }
-            
+
             // Simpan mock file agar bisa di re-upload
             currentSelectedFile = {
                 name: name,
@@ -615,11 +653,20 @@
         }
 
         // Hapus kartu riwayat
-        function deleteHistoryCard(event, element) {
+        function deleteHistoryCard(event, element, id) {
             event.stopPropagation();
             const card = element.closest('.glass-card');
             card.remove();
-            
+
+            // Hapus dari localStorage
+            const userNim = localStorage.getItem('user_nim');
+            if (userNim && id) {
+                const historyKey = 'upload_history_' + userNim;
+                let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+                history = history.filter(item => item.id !== String(id));
+                localStorage.setItem(historyKey, JSON.stringify(history));
+            }
+
             // Tampilkan kembali placeholder kosong jika riwayat habis
             const historyList = document.querySelector('.lg\\:col-span-4 .flex-col.gap-4');
             if (historyList && historyList.children.length === 0) {
@@ -668,6 +715,17 @@
             document.getElementById('profile-name').textContent = userName;
             document.getElementById('profile-nim').textContent = 'NIM: ' + userNim;
             document.getElementById('profile-initial').textContent = userName.charAt(0).toUpperCase();
+
+            // Load History
+            const historyKey = 'upload_history_' + userNim;
+            const savedHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            if (savedHistory.length > 0) {
+                const historyList = document.querySelector('.lg\\:col-span-4 .flex-col.gap-4');
+                historyList.innerHTML = ''; // Clear placeholder
+                [...savedHistory].reverse().forEach(item => {
+                    injectCardToHistory(item.name, item.size, item.date, item.type, item.previewDataUrl, item.id, false);
+                });
+            }
 
             // Logout click listener
             const logoutBtn = document.getElementById('logout-btn');

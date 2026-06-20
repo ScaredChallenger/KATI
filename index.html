@@ -162,20 +162,6 @@
             </div>
             <!-- Access Form -->
             <form class="w-full space-y-stack-md" onsubmit="handleLogin(event)" novalidate>
-                <!-- Full Name Input -->
-                <div class="space-y-base">
-                    <label
-                        class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Full
-                        Name</label>
-                    <div
-                        class="relative flex items-center bg-black/20 border border-outline-variant rounded-lg transition-all duration-300 input-focus-ring">
-                        <span class="material-symbols-outlined absolute left-4 text-on-surface-variant"
-                            data-icon="person">person</span>
-                        <input id="login-name"
-                            class="w-full bg-transparent border-none text-on-surface pl-12 py-4 focus:ring-0 font-body-md placeholder:text-outline"
-                            placeholder="Enter your full name" type="text" required>
-                    </div>
-                </div>
                 <!-- Student NIM Input -->
                 <div class="space-y-base">
                     <label
@@ -192,13 +178,14 @@
                     <p class="text-[11px] font-label-sm text-outline ml-1">Enter your 8-digit NIM</p>
                 </div>
                 <!-- Error Message Container -->
-                <div id="error-message" class="hidden text-error text-label-md bg-error-container/20 border border-error/50 p-3 rounded-lg text-center font-medium transition-all duration-300">
+                <div id="error-message"
+                    class="hidden text-error text-label-md bg-error-container/20 border border-error/50 p-3 rounded-lg text-center font-medium transition-all duration-300">
                 </div>
                 <!-- Submit Button -->
                 <button
                     class="w-full bg-on-surface text-surface font-headline-md py-4 rounded-lg font-bold transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] mt-base"
                     type="submit">
-                    Submit NIM and Name
+                    Submit NIM
                 </button>
             </form>
             <!-- Social/Secondary Visuals (Optional micro-interaction) -->
@@ -227,7 +214,6 @@
             // Menghentikan reload halaman bawaan yang kuno
             event.preventDefault();
 
-            const name = document.getElementById('login-name').value.trim();
             const nim = document.getElementById('login-nim').value.trim();
             const errorMsg = document.getElementById('error-message');
 
@@ -235,31 +221,17 @@
             errorMsg.classList.add('hidden');
             errorMsg.textContent = '';
 
-            const isNameEmpty = name === '';
             const isNimEmpty = nim === '';
 
-            if (isNameEmpty && isNimEmpty) {
-                showError("Harus input nama dan NIM");
-                return;
-            } else if (isNameEmpty) {
-                showError("Silakan input nama");
-                return;
-            } else if (isNimEmpty) {
+            if (isNimEmpty) {
                 showError("Silakan input NIM");
                 return;
             }
 
-            const isNameValid = name.length >= 3;
             const nimRegex = /^[0-9]{8}$/;
             const isNimValid = nimRegex.test(nim);
 
-            if (!isNameValid && !isNimValid) {
-                showError("Nama dan NIM tidak sesuai format");
-                return;
-            } else if (!isNameValid && isNimValid) {
-                showError("Nama minimal harus 3 karakter");
-                return;
-            } else if (isNameValid && !isNimValid) {
+            if (!isNimValid) {
                 showError("NIM harus tepat 8 angka");
                 return;
             }
@@ -287,16 +259,11 @@
                 } else if (data.length === 0) {
                     showError("NIM tidak terdaftar di sistem.");
                 } else {
-                    // NIM ditemukan, cek apakah nama cocok (tidak membedakan huruf besar/kecil)
+                    // NIM ditemukan, ambil data nama dari database
                     const student = data[0];
-                    if (student.name.trim().toLowerCase() !== name.toLowerCase()) {
-                        showError("NIM benar, tapi nama tidak sesuai database.");
-                    } else {
-                        // Jika valid & cocok
-                        localStorage.setItem('user_name', student.name);
-                        localStorage.setItem('user_nim', student.nim);
-                        window.location.href = 'dashboard.html';
-                    }
+                    localStorage.setItem('user_name', student.name);
+                    localStorage.setItem('user_nim', student.nim);
+                    window.location.href = 'dashboard.html';
                 }
             } catch (err) {
                 console.error(err);

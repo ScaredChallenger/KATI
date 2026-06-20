@@ -171,7 +171,8 @@
         <header class="mb-stack-lg flex flex-col gap-base">
             <h1 class="font-headline-lg text-headline-lg text-on-surface">Certificate Hub</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                Uploud sertifikat dari ujian Digitalent di kotak uploud dibawah ini, dan pastikan file yang di uploud benar!
+                Uploud sertifikat dari ujian Digitalent di kotak uploud dibawah ini, dan pastikan file yang di uploud
+                benar!
             </p>
         </header>
         <!-- Main Content Grid -->
@@ -387,12 +388,12 @@
                 }
 
                 finishProgressBar();
-                
+
                 // Dapatkan public URL dari Supabase
                 const { data: urlData } = supabaseClient.storage
                     .from('certificates')
                     .getPublicUrl(filePath);
-                    
+
                 return urlData.publicUrl;
 
             } catch (err) {
@@ -578,10 +579,10 @@
             style="background: rgba(255, 255, 255, 0.05);" onclick="loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')">
             <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim relative">
-                    ${type.includes('image') && previewDataUrl 
-                        ? `<img src="${previewDataUrl}" alt="Thumbnail" class="w-full h-full object-cover">`
-                        : `<span class="material-symbols-outlined">${iconName}</span>`
-                    }
+                    ${type.includes('image') && previewDataUrl
+                    ? `<img src="${previewDataUrl}" alt="Thumbnail" class="w-full h-full object-cover">`
+                    : `<span class="material-symbols-outlined">${iconName}</span>`
+                }
                 </div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between mb-1">

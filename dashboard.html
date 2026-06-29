@@ -374,7 +374,8 @@
 
                 // Bersihkan nama file dari spasi dan karakter aneh agar aman sebagai URL
                 const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-                const filePath = `${Date.now()}_${safeFileName}`;
+                const userNim = localStorage.getItem('user_nim') || '00000000';
+                const filePath = `${userNim}_${Date.now()}_${safeFileName}`;
 
                 const { data, error } = await supabaseClient.storage
                     .from('certificates')

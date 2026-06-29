@@ -188,11 +188,40 @@
                     Submit NIM
                 </button>
             </form>
-            <!-- Social/Secondary Visuals (Optional micro-interaction) -->
-            <div class="mt-stack-lg w-full flex items-center justify-center gap-base opacity-20">
-                <div class="h-[1px] flex-grow bg-outline-variant"></div>
-                <span class="material-symbols-outlined text-[16px]" data-icon="security">security</span>
-                <div class="h-[1px] flex-grow bg-outline-variant"></div>
+            <!-- Admin & Lecturer Login Section -->
+            <div class="w-full mt-stack-md">
+                <div class="relative flex py-4 items-center">
+                    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+                    <span class="flex-shrink-0 mx-4 text-on-surface-variant font-label-sm uppercase tracking-widest text-[10px]">Admin &amp; Lecturer</span>
+                    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+                </div>
+
+                <form class="w-full space-y-3" onsubmit="handleAdminLogin(event)" novalidate>
+                    <div
+                        class="relative flex items-center bg-black/20 border border-outline-variant rounded-lg transition-all duration-300 input-focus-ring">
+                        <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]"
+                            data-icon="admin_panel_settings">admin_panel_settings</span>
+                        <input id="login-admin"
+                            class="w-full bg-transparent border-none text-on-surface pl-10 py-3 focus:ring-0 font-body-md placeholder:text-outline text-sm"
+                            type="text" placeholder="Admin ID / Username" required>
+                    </div>
+                    <div
+                        class="relative flex items-center bg-black/20 border border-outline-variant rounded-lg transition-all duration-300 input-focus-ring">
+                        <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]"
+                            data-icon="key">key</span>
+                        <input id="login-password"
+                            class="w-full bg-transparent border-none text-on-surface pl-10 py-3 focus:ring-0 font-body-md placeholder:text-outline text-sm"
+                            type="password" placeholder="Password" required>
+                    </div>
+                    <div id="error-message-admin"
+                        class="hidden text-error text-[12px] bg-error-container/20 border border-error/50 p-2 rounded-lg text-center font-medium transition-all duration-300">
+                    </div>
+                    <button
+                        class="w-full border border-outline-variant text-on-surface hover:bg-white/5 font-label-md py-3 rounded-lg font-bold transition-all duration-300 text-sm"
+                        type="submit">
+                        Access Admin Dashboard
+                    </button>
+                </form>
             </div>
         </div>
         <!-- Footer Policy (Consistent with JSON requirements) -->
@@ -276,6 +305,77 @@
             function showError(msg) {
                 errorMsg.textContent = msg;
                 errorMsg.classList.remove('hidden');
+            }
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+
+            const adminId = document.getElementById('login-admin').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const errorMsg = document.getElementById('error-message-admin');
+
+            errorMsg.classList.add('hidden');
+            errorMsg.textContent = '';
+
+            if (adminId === '' || password === '') {
+                errorMsg.textContent = "Silakan isi Admin ID dan Password";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const btn = event.target.querySelector('button[type="submit"]');
+            const originalBtnText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Verifying...";
+
+            try {
+                if (!supabaseClient) throw new Error("Supabase client not initialized");
+                
+                // Cek data di tabel admins (asumsi ada tabel admins)
+                const { data, error } = await supabaseClient
+                    .from('admins')
+                    .select('*')
+                    .eq('username', adminId)
+                    .eq('password', password);
+
+                if (error) {
+                    console.error(error);
+                    // Fallback to dummy login if table doesn't exist or error occurs
+                    if (adminId === '10904626' && password === 'Rahasia') {
+                        localStorage.setItem('admin_name', 'Administrator');
+                        window.location.href = 'dashboard_admin.html';
+                    } else {
+                        errorMsg.textContent = "Login gagal: " + error.message;
+                        errorMsg.classList.remove('hidden');
+                    }
+                } else if (data && data.length > 0) {
+                    const admin = data[0];
+                    localStorage.setItem('admin_name', admin.name || 'Administrator');
+                    window.location.href = 'dashboard_admin.html';
+                } else {
+                    // Fallback dummy login
+                    if (adminId === '10904626' && password === 'Rahasia') {
+                        localStorage.setItem('admin_name', 'Administrator');
+                        window.location.href = 'dashboard_admin.html';
+                    } else {
+                        errorMsg.textContent = "ID atau Password Admin salah.";
+                        errorMsg.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                // Fallback dummy login for frontend testing without internet/db
+                if (adminId === '10904626' && password === 'Rahasia') {
+                    localStorage.setItem('admin_name', 'Administrator');
+                    window.location.href = 'dashboard_admin.html';
+                } else {
+                    errorMsg.textContent = "Gagal menghubungi server database.";
+                    errorMsg.classList.remove('hidden');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalBtnText;
             }
         }
     </script>

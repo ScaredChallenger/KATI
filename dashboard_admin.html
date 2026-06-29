@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="dark" lang="en" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>KATI-CERTIFIED UPLOUDER - Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="KATI - UPLOUDER.png">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        :root {
+            --on-surface: #e5e2e1;
+            --on-surface-variant: #b9cacb;
+            --background: #000000;
+            --surface-container: #161616;
+            --outline-variant: #262626;
+            --primary-fixed-dim: #00dbe9;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-specular: rgba(255, 255, 255, 0.12);
+            --glass-shadow: rgba(0, 0, 0, 0.6);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-surface);
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.01));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 var(--glass-shadow),
+                inset 0 1px 0px var(--glass-specular),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary": "#dbfcff",
+                        "surface-bright": "#3a3939",
+                        "on-secondary-fixed-variant": "#7200a3",
+                        "on-primary-fixed": "#002022",
+                        "outline": "#849495",
+                        "on-background": "var(--on-surface)",
+                        "primary-fixed-dim": "var(--primary-fixed-dim)",
+                        "surface-dim": "var(--background)",
+                        "tertiary-fixed-dim": "#e9c400",
+                        "on-tertiary-fixed-variant": "#554600",
+                        "on-primary-container": "#006970",
+                        "on-surface": "var(--on-surface)",
+                        "outline-variant": "var(--outline-variant)",
+                        "background": "var(--background)",
+                        "tertiary-fixed": "#ffe171",
+                        "inverse-on-surface": "#313030",
+                        "secondary-fixed": "#f6d9ff",
+                        "primary-fixed": "#7df4ff",
+                        "surface-container-low": "var(--background)",
+                        "on-secondary": "#510074",
+                        "surface-container": "var(--surface-container)",
+                        "secondary": "#e9b3ff",
+                        "inverse-surface": "var(--on-surface)",
+                        "on-primary": "#00363a",
+                        "tertiary": "#fff5dd",
+                        "on-tertiary-container": "#705d00",
+                        "primary-container": "#00f0ff",
+                        "surface-container-highest": "var(--surface-container)",
+                        "surface-container-high": "var(--surface-container)",
+                        "secondary-fixed-dim": "#e9b3ff",
+                        "on-tertiary": "#3b2f00",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-secondary-container": "#e5a9ff",
+                        "on-secondary-fixed": "#310048",
+                        "on-surface-variant": "var(--on-surface-variant)",
+                        "surface-variant": "#353534",
+                        "on-error": "#690005",
+                        "surface-tint": "#00dbe9",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "secondary-container": "#7d01b1",
+                        "on-tertiary-fixed": "#221b00",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006970",
+                        "tertiary-container": "#ffd60b",
+                        "surface": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "12px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "stack-md": "24px",
+                        "section-gap": "80px",
+                        "stack-lg": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="min-h-screen">
+    <!-- Navigation Shell -->
+    <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md"
+        style="border-bottom: 1px solid var(--glass-border);">
+        <div class="max-w-7xl mx-auto px-container-margin h-20 flex items-center justify-between">
+            <div id="kati-logo" class="flex items-center gap-3 cursor-pointer select-none" title="KATI Logo">
+                <img src="KATI - UPLOUDER.png" alt="KATI Logo" class="w-8 h-8 object-contain invert" onerror="this.src='https://via.placeholder.com/32'; this.classList.remove('invert')">
+                <span class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
+            </div>
+            
+            <button id="logout-btn"
+                class="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                Logout
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto pt-[120px] pb-stack-lg px-container-margin">
+        <!-- Header Section -->
+        <header class="mb-stack-lg flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[rgba(255,255,255,0.08)] pb-8">
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Admin Dashboard</h1>
+            
+            <!-- Search Pill -->
+            <div class="relative max-w-md w-full">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                <input type="text" id="search-input" placeholder="Cari nama file atau NIM..."
+                    class="w-full bg-[rgba(255,255,255,0.05)] border border-white text-on-surface rounded-full pl-12 pr-4 py-3 focus:outline-none focus:border-[#00dbe9] focus:ring-1 focus:ring-[#00dbe9] transition-all placeholder:text-on-surface-variant/50">
+            </div>
+        </header>
+
+        <!-- Main Content: Just the Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter" id="files-grid">
+            <!-- Script will inject cards here -->
+        </div>
+    </main>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://pyazxjshahhqslhsafli.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5YXp4anNoYWhocXNsaHNhZmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAzMzYsImV4cCI6MjA5NzA4NjMzNn0.Muq2wy7hWGioFO886xNBt5GIcqS0osIi4Qad-eTkOOs';
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        // Efek bersinar pada kartu
+        function applyGlowEffect() {
+            document.querySelectorAll('.glass-card').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                    card.style.background = `radial-gradient(400px circle at ${x}px ${y}px, rgba(255,255,255,0.08), transparent 40%), rgba(255,255,255,0.05)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.background = 'rgba(255, 255, 255, 0.05)';
+                });
+            });
+        }
+
+        function renderFileCard(name, size, date, type, previewDataUrl, nim, studentName) {
+            const grid = document.getElementById('files-grid');
+            
+            let iconName = 'description';
+            if (type.includes('image')) iconName = 'image';
+            if (type.includes('pdf')) iconName = 'picture_as_pdf';
+            if (type.includes('zip') || type.includes('rar')) iconName = 'folder_zip';
+
+            const escapedName = name.replace(/'/g, "\\'");
+            const safeNim = nim || 'Unknown';
+            const safeStudentName = studentName || 'Unknown Student';
+            
+            // For admin, clicking opens in new tab
+            const clickAction = previewDataUrl ? `window.open('${previewDataUrl}', '_blank')` : "alert('File preview tidak tersedia')";
+
+            const card = `
+            <div class="glass-card file-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer flex flex-col gap-4"
+                style="background: rgba(255, 255, 255, 0.05);" onclick="${clickAction}" data-name="${name.toLowerCase()}" data-nim="${safeNim.toLowerCase()}" data-studentname="${safeStudentName.toLowerCase()}">
+                
+                <div class="w-full h-32 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center relative">
+                    ${type.includes('image') && previewDataUrl
+                    ? `<img src="${previewDataUrl}" alt="Thumbnail" class="w-full h-full object-cover">`
+                    : `<span class="material-symbols-outlined text-[48px] text-primary-fixed-dim">${iconName}</span>`
+                    }
+                </div>
+                
+                <div class="flex-grow">
+                    <h4 class="font-headline-md text-[16px] text-on-surface truncate w-full mb-1" title="${name}">
+                        ${name}
+                    </h4>
+                    <p class="font-label-sm text-[11px] text-on-surface-variant mb-2 truncate" title="${safeStudentName}">
+                        Nama: <span class="text-primary">${safeStudentName}</span><br>
+                        NIM: <span class="text-primary">${safeNim}</span>
+                    </p>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
+                        <span>${size} MB</span>
+                        <span>${date}</span>
+                    </p>
+                </div>
+            </div>`;
+            
+            grid.insertAdjacentHTML('beforeend', card);
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check admin session
+            const adminName = localStorage.getItem('admin_name');
+
+            if (!adminName) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Fetch students from Supabase to map NIM -> Name
+            let studentMap = {};
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('students').select('nim, name');
+                    if (data) {
+                        data.forEach(s => {
+                            studentMap[s.nim] = s.name;
+                        });
+                    }
+                } catch (err) {
+                    console.error("Gagal mengambil data student:", err);
+                }
+            }
+
+            // Load files from Supabase Storage
+            const grid = document.getElementById('files-grid');
+            let hasFiles = false;
+
+            if (supabaseClient) {
+                try {
+                    const { data: files, error } = await supabaseClient.storage.from('certificates').list();
+                    if (files && files.length > 0) {
+                        // Filter out empty placeholder file if exists
+                        const validFiles = files.filter(f => f.name !== '.emptyFolderPlaceholder');
+                        if (validFiles.length > 0) {
+                            hasFiles = true;
+                            // Sort by created_at desc
+                            validFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                            
+                            for (const file of validFiles) {
+                                // Extract NIM from filename: NIM_Timestamp_OriginalName
+                                let uNim = 'Unknown';
+                                let actualName = file.name;
+                                
+                                const parts = file.name.split('_');
+                                if (parts.length >= 3 && parts[0].length === 8 && !isNaN(parts[0])) {
+                                    uNim = parts[0];
+                                    // join the rest as name
+                                    actualName = parts.slice(2).join('_');
+                                } else if (parts.length >= 2 && !isNaN(parts[0])) { 
+                                    // Maybe just timestamp first for old files
+                                    actualName = parts.slice(1).join('_');
+                                }
+                                
+                                const studentName = studentMap[uNim] || 'Unknown Student';
+                                const sizeMB = (file.metadata?.size / (1024 * 1024)).toFixed(2) || '0.00';
+                                const date = new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                                const type = file.metadata?.mimetype || 'application/octet-stream';
+                                
+                                // Get public URL
+                                const { data: urlData } = supabaseClient.storage.from('certificates').getPublicUrl(file.name);
+                                const previewDataUrl = urlData.publicUrl;
+                                
+                                renderFileCard(actualName, sizeMB, date, type, previewDataUrl, uNim, studentName);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Gagal mengambil data file:", err);
+                }
+            }
+
+            if (!hasFiles) {
+                grid.innerHTML = `
+                    <div id="empty-history-state" class="glass-card p-10 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] col-span-full h-[400px]" style="background: rgba(255, 255, 255, 0.05);">
+                        <span class="material-symbols-outlined text-[64px] text-on-surface-variant/40 mb-4" style="font-variation-settings: 'FILL' 0;">folder_open</span>
+                        <h4 class="font-headline-md text-headline-md text-on-surface mb-2">Belum ada file</h4>
+                        <p class="font-body-md text-body-md text-on-surface-variant max-w-[300px]">Data atau file yang diupload oleh peserta akan muncul di sini.</p>
+                    </div>
+                `;
+            }
+            
+            // Search logic
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const cards = document.querySelectorAll('.file-card');
+                    let visibleCount = 0;
+                    
+                    cards.forEach(card => {
+                        const nameAttr = card.getAttribute('data-name') || '';
+                        const nimAttr = card.getAttribute('data-nim') || '';
+                        const studentAttr = card.getAttribute('data-studentname') || '';
+                        
+                        if (nameAttr.includes(query) || nimAttr.includes(query) || studentAttr.includes(query)) {
+                            card.style.display = 'flex';
+                            visibleCount++;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    let emptyState = document.getElementById('empty-search-state');
+                    if (visibleCount === 0 && cards.length > 0) {
+                        if (!emptyState) {
+                            grid.insertAdjacentHTML('beforeend', `
+                                <div id="empty-search-state" class="glass-card p-10 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] col-span-full h-[400px]" style="background: rgba(255, 255, 255, 0.05);">
+                                    <span class="material-symbols-outlined text-[64px] text-on-surface-variant/40 mb-4" style="font-variation-settings: 'FILL' 0;">search_off</span>
+                                    <h4 class="font-headline-md text-headline-md text-on-surface mb-2">Pencarian tidak ditemukan</h4>
+                                    <p class="font-body-md text-body-md text-on-surface-variant max-w-[300px]">Coba gunakan kata kunci nama file atau NIM lain.</p>
+                                </div>
+                            `);
+                        } else {
+                            emptyState.style.display = 'flex';
+                        }
+                    } else if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+                });
+            }
+
+            applyGlowEffect();
+
+            // Logout
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('admin_name');
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

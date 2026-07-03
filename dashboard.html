@@ -61,6 +61,27 @@
             background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='rgba(255, 255, 255, 0.2)' stroke-width='2' stroke-dasharray='8%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
             border-radius: 24px;
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -154,7 +175,6 @@
 </head>
 
 <body class="min-h-screen">
-    <!-- Navigation Shell -->
     <nav class="fixed top-0 left-0 w-full z-50 border-b border-b-glass-border bg-black/40 backdrop-blur-md"
         style="border-bottom: 1px solid var(--glass-border);">
         <div class="max-w-7xl mx-auto px-container-margin h-20 flex items-center justify-between">
@@ -163,6 +183,12 @@
                 <span
                     class="font-headline-md text-label-md font-bold tracking-wider uppercase text-on-surface">KATI</span>
             </div>
+            
+            <button id="logout-btn"
+                class="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                Logout
+            </button>
         </div>
     </nav>
 
@@ -204,19 +230,14 @@
                         </div>
                     </div>
 
-                    <!-- Logout Button -->
-                    <button id="logout-btn"
-                        class="w-full mt-2 py-3 rounded-xl border border-red-500/30 text-red-400 font-label-md text-label-md hover:bg-red-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[18px]">logout</span>
-                        Logout
-                    </button>
+
                 </div>
             </div>
 
             <!-- Middle: Upload Section (5 cols) -->
             <div class="lg:col-span-5 flex flex-col gap-stack-md">
                 <!-- Upload Zone -->
-                <div class="glass-card dashed-border h-[400px] flex flex-col items-center justify-center p-stack-lg group cursor-pointer hover:bg-[rgba(255,255,255,0.08)] transition-all duration-500"
+                <div class="glass-card dashed-border min-h-[400px] flex flex-col items-center justify-center p-stack-lg group cursor-pointer hover:bg-[rgba(255,255,255,0.08)] transition-all duration-500"
                     id="drop-zone" style="background: rgba(255, 255, 255, 0.05);">
 
                     <!-- Preview Container -->
@@ -263,6 +284,8 @@
                         <h2 class="font-headline-md text-headline-md text-on-surface mb-2 pointer-events-none">Drop your
                             certificate here</h2>
                     </div>
+
+                    <textarea id="upload-note" class="mt-4 w-11/12 max-w-2xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-xl p-3 text-on-surface text-body-md focus:outline-none focus:border-primary placeholder-on-surface-variant/50 pointer-events-auto resize-none z-10 transition-colors hover:bg-[rgba(255,255,255,0.08)]" rows="4" placeholder="Add some notes or description here..." onclick="event.stopPropagation()"></textarea>
 
                     <input id="file-input" class="hidden" type="file" accept="*/*">
                 </div>
@@ -375,7 +398,8 @@
                 // Bersihkan nama file dari spasi dan karakter aneh agar aman sebagai URL
                 const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
                 const userNim = localStorage.getItem('user_nim') || '00000000';
-                const filePath = `${userNim}_${Date.now()}_${safeFileName}`;
+                const fileTimestamp = Date.now();
+                const filePath = `${userNim}_${fileTimestamp}_${safeFileName}`;
 
                 const { data, error } = await supabaseClient.storage
                     .from('certificates')
@@ -386,6 +410,14 @@
 
                 if (error) {
                     throw error;
+                }
+
+                // Upload note if exists
+                const noteText = document.getElementById('upload-note') ? document.getElementById('upload-note').value.trim() : '';
+                if (noteText) {
+                    const noteBlob = new Blob([noteText], { type: 'text/plain' });
+                    const noteFileName = `${userNim}_${fileTimestamp}_note.txt`;
+                    await supabaseClient.storage.from('certificates').upload(noteFileName, noteBlob, { cacheControl: '3600', upsert: false }).catch(e => console.warn("Gagal mengupload catatan:", e));
                 }
 
                 finishProgressBar();
@@ -494,6 +526,9 @@
         document.getElementById('cancel-upload-btn').addEventListener('click', () => {
             currentSelectedFile = null;
             fileInput.value = '';
+            if (document.getElementById('upload-note')) {
+                document.getElementById('upload-note').value = '';
+            }
             document.getElementById('preview-container').classList.add('hidden');
             document.getElementById('default-upload-ui').classList.remove('hidden');
             document.getElementById('cancel-upload-btn').classList.add('hidden');
@@ -515,7 +550,8 @@
                     finishProgressBar();
                     const fileSizeMB = (currentSelectedFile.size / (1024 * 1024)).toFixed(2);
                     const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-                    injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, document.getElementById('file-preview-img').src);
+                    const noteText = document.getElementById('upload-note') ? document.getElementById('upload-note').value.trim() : '';
+                    injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, document.getElementById('file-preview-img').src, null, true, noteText);
                     document.getElementById('cancel-upload-btn').click();
                     btn.disabled = false;
                     btn.textContent = "Upload";
@@ -529,13 +565,9 @@
                 const fileSizeMB = (currentSelectedFile.size / (1024 * 1024)).toFixed(2);
                 const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
-                let previewUrl = '';
-                if (currentSelectedFile.type.startsWith('image/')) {
-                    previewUrl = publicUrl; // Simpan URL asli gambar Supabase, bukan base64 yang sangat berat
-                }
-
                 // Suntik ke UI History
-                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, previewUrl);
+                const noteText = document.getElementById('upload-note') ? document.getElementById('upload-note').value.trim() : '';
+                injectCardToHistory(currentSelectedFile.name, fileSizeMB, currentDate, currentSelectedFile.type, publicUrl, null, true, noteText);
 
                 // Reset setelah sukses
                 document.getElementById('cancel-upload-btn').click();
@@ -546,7 +578,7 @@
         });
 
         // Render komponen kartu riwayat ke dalam interface
-        function injectCardToHistory(name, size, date, type, previewDataUrl = '', id = null, shouldSave = true) {
+        function injectCardToHistory(name, size, date, type, previewDataUrl = '', id = null, shouldSave = true, note = '') {
             const emptyState = document.getElementById('empty-history-state');
             if (emptyState) {
                 emptyState.remove();
@@ -560,7 +592,7 @@
                     if (userNim) {
                         const historyKey = 'upload_history_' + userNim;
                         let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                        history.unshift({ id, name, size, date, type, previewDataUrl });
+                        history.unshift({ id, name, size, date, type, previewDataUrl, note });
                         localStorage.setItem(historyKey, JSON.stringify(history));
                     }
                 } catch (e) {
@@ -575,26 +607,28 @@
             if (type.includes('zip') || type.includes('rar')) iconName = 'folder_zip';
 
             const escapedName = name.replace(/'/g, "\\'");
-            const newHistoryCard = `
-        <div class="glass-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer"
+            const noteHtml = note ? `<div class="mt-2 text-xs text-on-surface-variant bg-[rgba(255,255,255,0.05)] p-2 rounded border border-[rgba(255,255,255,0.05)]">${note}</div>` : '';
+            
+    const newHistoryCard = `
+        <div class="glass-card p-4 sm:p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer w-full"
             style="background: rgba(255, 255, 255, 0.05);" onclick="loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')">
-            <div class="flex items-start gap-4">
+            <div class="flex items-start gap-3 sm:gap-4 w-full">
                 <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim relative">
                     ${type.includes('image') && previewDataUrl
                     ? `<img src="${previewDataUrl}" alt="Thumbnail" class="w-full h-full object-cover">`
                     : `<span class="material-symbols-outlined">${iconName}</span>`
                 }
                 </div>
-                <div class="flex-grow">
-                    <div class="flex items-center justify-between mb-1">
-                        <h4 class="font-label-md text-label-md text-on-surface truncate w-32" title="${name}">
+                <div class="flex-grow min-w-0">
+                    <div class="flex items-center justify-between mb-1 gap-2">
+                        <h4 class="font-label-md text-label-md text-on-surface truncate flex-1 min-w-0" title="${name}">
                             ${name}
                         </h4>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-label-sm text-[10px] uppercase tracking-wider">
+                        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                            <span class="px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-label-sm text-[10px] uppercase tracking-wider hidden sm:inline-block">
                                 Supabase
                             </span>
-                            <button class="text-red-400 hover:text-red-300 transition-colors p-1" onclick="deleteHistoryCard(event, this, '${id}')">
+                            <button class="text-red-400 hover:text-red-300 transition-colors p-1 flex-shrink-0" onclick="deleteHistoryCard(event, this, '${id}')">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                         </div>
@@ -602,6 +636,7 @@
                     <p class="font-label-sm text-label-sm text-on-surface-variant">
                         ${size} MB • ${date}
                     </p>
+                    ${note ? `<div class="mt-2 text-xs text-on-surface-variant bg-[rgba(255,255,255,0.05)] p-2 rounded border border-[rgba(255,255,255,0.05)] break-words whitespace-pre-wrap">${note}</div>` : ''}
                 </div>
             </div>
         </div>`;
@@ -648,19 +683,71 @@
         }
 
         // Hapus kartu riwayat
-        function deleteHistoryCard(event, element, id) {
+        async function deleteHistoryCard(event, element, id) {
             event.stopPropagation();
+            
+            const userNim = localStorage.getItem('user_nim');
+            if (!userNim || !id) return;
+
             const card = element.closest('.glass-card');
+            
+            // Tampilkan loading state
+            const btn = element;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>`;
+            btn.disabled = true;
+
+            const historyKey = 'upload_history_' + userNim;
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            const itemToDelete = history.find(item => item.id === String(id));
+            
+            if (itemToDelete && itemToDelete.previewDataUrl && typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const urlObj = new URL(itemToDelete.previewDataUrl);
+                    const pathSegments = urlObj.pathname.split('/');
+                    const filePath = decodeURIComponent(pathSegments[pathSegments.length - 1]);
+                    
+                    if (filePath) {
+                        const filesToRemove = [filePath];
+                        
+                        // Ekstrak timestamp untuk hapus note jika ada
+                        const parts = filePath.split('_');
+                        if (parts.length >= 2) {
+                            const nim = parts[0];
+                            const timestamp = parts[1];
+                            filesToRemove.push(`${nim}_${timestamp}_note.txt`);
+                        }
+
+                        const { error } = await supabaseClient.storage.from('certificates').remove(filesToRemove);
+                        if (error) {
+                            console.error("Gagal menghapus dari Supabase:", error);
+                            alert("Gagal menghapus dari database Supabase: " + error.message + "\\nPastikan Policy DELETE sudah diatur di Supabase Storage.");
+                            
+                            // Kembalikan tombol ke semula karena gagal hapus
+                            btn.innerHTML = originalHtml;
+                            btn.disabled = false;
+                            return; // Stop eksekusi agar kartu tidak terhapus dari UI
+                        } else {
+                            console.log("Berhasil menghapus:", filesToRemove);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error parse URL atau hapus Supabase:", e);
+                    alert("Terjadi kesalahan saat menghapus file: " + e.message);
+                    
+                    // Kembalikan tombol ke semula karena gagal hapus
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    return; // Stop eksekusi
+                }
+            }
+
+            // Hapus dari UI setelah sukses
             card.remove();
 
             // Hapus dari localStorage
-            const userNim = localStorage.getItem('user_nim');
-            if (userNim && id) {
-                const historyKey = 'upload_history_' + userNim;
-                let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-                history = history.filter(item => item.id !== String(id));
-                localStorage.setItem(historyKey, JSON.stringify(history));
-            }
+            history = history.filter(item => item.id !== String(id));
+            localStorage.setItem(historyKey, JSON.stringify(history));
 
             // Tampilkan kembali placeholder kosong jika riwayat habis
             const historyList = document.querySelector('.lg\\:col-span-4 .flex-col.gap-4');
@@ -718,7 +805,7 @@
                 const historyList = document.querySelector('.lg\\:col-span-4 .flex-col.gap-4');
                 historyList.innerHTML = ''; // Clear placeholder
                 [...savedHistory].reverse().forEach(item => {
-                    injectCardToHistory(item.name, item.size, item.date, item.type, item.previewDataUrl, item.id, false);
+                    injectCardToHistory(item.name, item.size, item.date, item.type, item.previewDataUrl, item.id, false, item.note || '');
                 });
             }
 

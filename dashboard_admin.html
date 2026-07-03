@@ -52,6 +52,27 @@
                 inset 0 1px 0px var(--glass-specular),
                 inset 0 -1px 2px rgba(0, 0, 0, 0.05);
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -205,7 +226,7 @@
             });
         }
 
-        function renderFileCard(name, size, date, type, previewDataUrl, nim, studentName) {
+        function renderFileCard(name, size, date, type, previewDataUrl, nim, studentName, noteUrl = null, fullFileName = '') {
             const grid = document.getElementById('files-grid');
             
             let iconName = 'description';
@@ -220,9 +241,14 @@
             // For admin, clicking opens in new tab
             const clickAction = previewDataUrl ? `window.open('${previewDataUrl}', '_blank')` : "alert('File preview tidak tersedia')";
 
+            const noteButton = noteUrl ? `<button onclick="event.stopPropagation(); window.open('${noteUrl}', '_blank')" class="mt-2 text-xs bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg w-full flex items-center justify-center gap-1.5 transition-colors border border-primary/20"><span class="material-symbols-outlined text-[14px]">description</span> Lihat Catatan</button>` : '';
+
+            const deleteButton = `<button onclick="deleteAdminFile(event, this, '${fullFileName}')" class="absolute top-3 right-3 bg-red-500/20 hover:bg-red-500/80 text-red-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-red-500/30 hover:border-red-500" title="Hapus File"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+
             const card = `
-            <div class="glass-card file-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer flex flex-col gap-4"
+            <div class="glass-card file-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer flex flex-col gap-4 relative"
                 style="background: rgba(255, 255, 255, 0.05);" onclick="${clickAction}" data-name="${name.toLowerCase()}" data-nim="${safeNim.toLowerCase()}" data-studentname="${safeStudentName.toLowerCase()}">
+                ${deleteButton}
                 
                 <div class="w-full h-32 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center relative">
                     ${type.includes('image') && previewDataUrl
@@ -231,7 +257,7 @@
                     }
                 </div>
                 
-                <div class="flex-grow">
+                <div class="flex-grow flex flex-col">
                     <h4 class="font-headline-md text-[16px] text-on-surface truncate w-full mb-1" title="${name}">
                         ${name}
                     </h4>
@@ -239,14 +265,66 @@
                         Nama: <span class="text-primary">${safeStudentName}</span><br>
                         NIM: <span class="text-primary">${safeNim}</span>
                     </p>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between mb-auto">
                         <span>${size} MB</span>
                         <span>${date}</span>
                     </p>
+                    ${noteButton}
                 </div>
             </div>`;
             
             grid.insertAdjacentHTML('beforeend', card);
+        }
+
+        async function deleteAdminFile(event, button, fullFileName) {
+            event.stopPropagation();
+            
+            const isConfirmed = await showCustomModal('confirm', 'Konfirmasi Hapus', 'Apakah kamu yakin ingin menghapus file ini secara permanen dari database?');
+            if (!isConfirmed) return;
+
+            const card = button.closest('.glass-card');
+            const originalHtml = button.innerHTML;
+            button.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>`;
+            button.disabled = true;
+
+            try {
+                const filesToRemove = [fullFileName];
+                
+                const parts = fullFileName.split('_');
+                if (parts.length >= 2 && parts[0].length === 8 && !isNaN(parts[0])) {
+                    const nim = parts[0];
+                    const timestamp = parts[1];
+                    filesToRemove.push(`${nim}_${timestamp}_note.txt`);
+                }
+
+                const { error } = await supabaseClient.storage.from('certificates').remove(filesToRemove);
+                
+                if (error) {
+                    console.error("Gagal menghapus:", error);
+                    await showCustomModal('error', 'Gagal Menghapus', "Pesan Error: " + error.message + ". Pastikan Policy DELETE sudah diatur di Supabase Storage.");
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                } else {
+                    card.remove();
+                    const grid = document.getElementById('files-grid');
+                    // Cek jika kosong tapi abaikan elemen .emptyFolderPlaceholder yang mungkin disembunyikan
+                    const visibleCards = grid.querySelectorAll('.file-card');
+                    if (visibleCards.length === 0) {
+                        grid.innerHTML = `
+                            <div id="empty-history-state" class="glass-card p-10 flex flex-col items-center justify-center text-center border-dashed border border-[rgba(255,255,255,0.15)] col-span-full h-[400px]" style="background: rgba(255, 255, 255, 0.05);">
+                                <span class="material-symbols-outlined text-[64px] text-on-surface-variant/40 mb-4" style="font-variation-settings: 'FILL' 0;">folder_open</span>
+                                <h4 class="font-headline-md text-[20px] text-on-surface mb-2">Belum ada file</h4>
+                                <p class="font-body-md text-on-surface-variant max-w-sm">File sertifikat yang diupload oleh siswa akan muncul di sini.</p>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error("Kesalahan:", err);
+                await showCustomModal('error', 'Terjadi Kesalahan', err.message);
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+            }
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -281,25 +359,46 @@
                 try {
                     const { data: files, error } = await supabaseClient.storage.from('certificates').list();
                     if (files && files.length > 0) {
-                        // Filter out empty placeholder file if exists
                         const validFiles = files.filter(f => f.name !== '.emptyFolderPlaceholder');
                         if (validFiles.length > 0) {
                             hasFiles = true;
-                            // Sort by created_at desc
-                            validFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                             
-                            for (const file of validFiles) {
-                                // Extract NIM from filename: NIM_Timestamp_OriginalName
+                            // Separate notes and main files
+                            const notes = {};
+                            const mainFiles = [];
+                            
+                            validFiles.forEach(file => {
+                                if (file.name.endsWith('_note.txt')) {
+                                    const parts = file.name.split('_');
+                                    if (parts.length >= 2) {
+                                        const nim = parts[0];
+                                        const ts = parts[1];
+                                        notes[`${nim}_${ts}`] = file;
+                                    }
+                                } else {
+                                    mainFiles.push(file);
+                                }
+                            });
+
+                            // Sort by created_at desc
+                            mainFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                            
+                            for (const file of mainFiles) {
                                 let uNim = 'Unknown';
                                 let actualName = file.name;
+                                let noteUrl = null;
                                 
                                 const parts = file.name.split('_');
                                 if (parts.length >= 3 && parts[0].length === 8 && !isNaN(parts[0])) {
                                     uNim = parts[0];
-                                    // join the rest as name
+                                    const ts = parts[1];
                                     actualName = parts.slice(2).join('_');
+                                    
+                                    if (notes[`${uNim}_${ts}`]) {
+                                        const { data: noteUrlData } = supabaseClient.storage.from('certificates').getPublicUrl(notes[`${uNim}_${ts}`].name);
+                                        noteUrl = noteUrlData.publicUrl;
+                                    }
                                 } else if (parts.length >= 2 && !isNaN(parts[0])) { 
-                                    // Maybe just timestamp first for old files
                                     actualName = parts.slice(1).join('_');
                                 }
                                 
@@ -308,11 +407,10 @@
                                 const date = new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
                                 const type = file.metadata?.mimetype || 'application/octet-stream';
                                 
-                                // Get public URL
                                 const { data: urlData } = supabaseClient.storage.from('certificates').getPublicUrl(file.name);
                                 const previewDataUrl = urlData.publicUrl;
                                 
-                                renderFileCard(actualName, sizeMB, date, type, previewDataUrl, uNim, studentName);
+                                renderFileCard(actualName, sizeMB, date, type, previewDataUrl, uNim, studentName, noteUrl, file.name);
                             }
                         }
                     }
@@ -382,6 +480,87 @@
                 });
             }
         });
+    </script>
+    
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="glass-card p-6 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 flex flex-col" style="background: rgba(20, 20, 20, 0.85); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <div class="flex items-center gap-3 mb-4 text-red-400" id="modal-icon-container">
+                <span class="material-symbols-outlined text-[28px]" id="modal-icon" style="font-variation-settings: 'FILL' 1;">warning</span>
+                <h3 class="font-headline-md text-[18px] text-on-surface font-semibold" id="modal-title">Konfirmasi</h3>
+            </div>
+            <p class="font-body-md text-[14px] text-on-surface-variant mb-6 leading-relaxed" id="modal-message">
+                Pesan di sini
+            </p>
+            <div class="flex items-center justify-end gap-3 mt-auto pt-2">
+                <button id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-white/5 hover:text-white transition-colors text-[14px] font-medium hidden">
+                    Batal
+                </button>
+                <button id="modal-confirm-btn" class="px-4 py-2 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-500/30 text-[14px] font-medium min-w-[80px]">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCustomModal(type, title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-modal');
+                const modalBox = modal.querySelector('.glass-card');
+                const titleEl = document.getElementById('modal-title');
+                const messageEl = document.getElementById('modal-message');
+                const iconEl = document.getElementById('modal-icon');
+                const cancelBtn = document.getElementById('modal-cancel-btn');
+                const confirmBtn = document.getElementById('modal-confirm-btn');
+                const iconContainer = document.getElementById('modal-icon-container');
+                
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                if (type === 'confirm') {
+                    iconEl.textContent = 'warning';
+                    iconContainer.className = 'flex items-center gap-3 mb-4 text-red-400';
+                    cancelBtn.classList.remove('hidden');
+                    confirmBtn.textContent = 'Hapus';
+                    confirmBtn.className = 'px-4 py-2 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-500/30 text-[14px] font-medium min-w-[80px]';
+                } else if (type === 'error') {
+                    iconEl.textContent = 'error';
+                    iconContainer.className = 'flex items-center gap-3 mb-4 text-red-400';
+                    cancelBtn.classList.add('hidden');
+                    confirmBtn.textContent = 'Tutup';
+                    confirmBtn.className = 'px-4 py-2 rounded-xl bg-white/5 text-on-surface hover:bg-white/10 transition-colors border border-white/10 text-[14px] font-medium min-w-[80px]';
+                } else {
+                    iconEl.textContent = 'info';
+                    iconContainer.className = 'flex items-center gap-3 mb-4 text-primary';
+                    cancelBtn.classList.add('hidden');
+                    confirmBtn.textContent = 'OK';
+                    confirmBtn.className = 'px-4 py-2 rounded-xl bg-primary/20 text-primary hover:bg-primary/40 transition-colors border border-primary/30 text-[14px] font-medium min-w-[80px]';
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                // Animasi masuk
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modalBox.classList.remove('scale-95');
+                });
+
+                const closeModal = (result) => {
+                    modal.classList.add('opacity-0');
+                    modalBox.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        resolve(result);
+                    }, 300); // durasi sesuai transition tailwind
+                };
+
+                cancelBtn.onclick = () => closeModal(false);
+                confirmBtn.onclick = () => closeModal(true);
+            });
+        }
     </script>
 </body>
 

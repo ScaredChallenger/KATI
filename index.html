@@ -332,47 +332,29 @@
             try {
                 if (!supabaseClient) throw new Error("Supabase client not initialized");
                 
-                // Cek data di tabel admins (asumsi ada tabel admins)
+                // Cek data di tabel administrator
                 const { data, error } = await supabaseClient
-                    .from('admins')
+                    .from('administrator')
                     .select('*')
-                    .eq('username', adminId)
+                    .eq('nim', adminId)
                     .eq('password', password);
 
                 if (error) {
                     console.error(error);
-                    // Fallback to dummy login if table doesn't exist or error occurs
-                    if (adminId === '10904626' && password === 'Rahasia') {
-                        localStorage.setItem('admin_name', 'Administrator');
-                        window.location.href = 'dashboard_admin.html';
-                    } else {
-                        errorMsg.textContent = "Login gagal: " + error.message;
-                        errorMsg.classList.remove('hidden');
-                    }
+                    errorMsg.textContent = "Login gagal: " + error.message;
+                    errorMsg.classList.remove('hidden');
                 } else if (data && data.length > 0) {
                     const admin = data[0];
                     localStorage.setItem('admin_name', admin.name || 'Administrator');
                     window.location.href = 'dashboard_admin.html';
                 } else {
-                    // Fallback dummy login
-                    if (adminId === '10904626' && password === 'Rahasia') {
-                        localStorage.setItem('admin_name', 'Administrator');
-                        window.location.href = 'dashboard_admin.html';
-                    } else {
-                        errorMsg.textContent = "ID atau Password Admin salah.";
-                        errorMsg.classList.remove('hidden');
-                    }
+                    errorMsg.textContent = "ID atau Password Admin salah.";
+                    errorMsg.classList.remove('hidden');
                 }
             } catch (err) {
                 console.error(err);
-                // Fallback dummy login for frontend testing without internet/db
-                if (adminId === '10904626' && password === 'Rahasia') {
-                    localStorage.setItem('admin_name', 'Administrator');
-                    window.location.href = 'dashboard_admin.html';
-                } else {
-                    errorMsg.textContent = "Gagal menghubungi server database.";
-                    errorMsg.classList.remove('hidden');
-                }
+                errorMsg.textContent = "Gagal menghubungi server database.";
+                errorMsg.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalBtnText;

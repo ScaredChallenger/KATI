@@ -213,7 +213,9 @@
             <div class="w-full mt-stack-md">
                 <div class="relative flex py-4 items-center">
                     <div class="flex-grow border-t border-outline-variant opacity-30"></div>
-                    <span class="flex-shrink-0 mx-4 text-on-surface-variant font-label-sm uppercase tracking-widest text-[10px]">Admin &amp; Lecturer</span>
+                    <span
+                        class="flex-shrink-0 mx-4 text-on-surface-variant font-label-sm uppercase tracking-widest text-[10px]">Admin
+                        &amp; Lecturer</span>
                     <div class="flex-grow border-t border-outline-variant opacity-30"></div>
                 </div>
 
@@ -352,7 +354,7 @@
 
             try {
                 if (!supabaseClient) throw new Error("Supabase client not initialized");
-                
+
                 // Cek data di tabel administrator
                 const { data, error } = await supabaseClient
                     .from('administrator')

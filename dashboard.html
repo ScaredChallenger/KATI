@@ -862,13 +862,28 @@
 
                         const { data, error } = await supabaseClient.storage.from('certificates').remove(filesToRemove);
                         if (error || !data || data.length === 0) {
-                            console.error("Gagal menghapus dari Supabase:", error || "File tidak ditemukan atau akses ditolak RLS");
-                            alert("Gagal menghapus dari database Supabase: " + (error ? error.message : "Akses ditolak atau file tidak ada.") + "\\nPastikan Policy DELETE sudah diatur di Supabase Storage.");
-
-                            // Kembalikan tombol ke semula karena gagal hapus
-                            btn.innerHTML = originalHtml;
-                            btn.disabled = false;
-                            return; // Stop eksekusi agar kartu tidak terhapus dari UI
+                            // Cek apakah file memang sudah tidak ada (mungkin dihapus oleh Admin)
+                            try {
+                                const checkResponse = await fetch(itemToDelete.previewDataUrl, { method: 'HEAD', cache: 'no-store' });
+                                if (checkResponse.status === 404) {
+                                    console.log("File sudah tidak ada di server (mungkin dihapus admin). Melanjutkan penghapusan riwayat lokal.");
+                                    // File tidak ada, anggap sukses dan biarkan kode di bawah menghapus card dari UI
+                                } else {
+                                    // File masih ada tapi gagal dihapus -> Masalah RLS Policy
+                                    console.error("Gagal menghapus dari Supabase:", error || "Akses ditolak RLS");
+                                    alert("Gagal menghapus dari database Supabase: " + (error ? error.message : "Akses ditolak.") + "\\nPastikan Policy DELETE sudah diatur di Supabase Storage.");
+                                    btn.innerHTML = originalHtml;
+                                    btn.disabled = false;
+                                    return; // Stop eksekusi
+                                }
+                            } catch (headError) {
+                                console.error("Gagal mengecek status file:", headError);
+                                // Fallback jika fetch gagal
+                                alert("Gagal menghapus dari database Supabase: " + (error ? error.message : "Akses ditolak atau file tidak ada.") + "\\nPastikan Policy DELETE sudah diatur.");
+                                btn.innerHTML = originalHtml;
+                                btn.disabled = false;
+                                return; // Stop eksekusi
+                            }
                         } else {
                             console.log("Berhasil menghapus:", filesToRemove);
                         }

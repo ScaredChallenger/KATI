@@ -242,13 +242,16 @@
             const safeNim = nim || 'Unknown';
             const safeStudentName = studentName || 'Unknown Student';
 
-            // For admin, clicking opens in new tab
-            const clickAction = previewDataUrl ? `window.open('${previewDataUrl}', '_blank')` : "alert('File preview tidak tersedia')";
+            const isTextSubmission = type === 'text/html' || name.endsWith('.html') || (type === 'text/plain' && name.endsWith('.txt') && !name.endsWith('_note.txt'));
+
+            // For admin, clicking opens in new tab (text submissions get rendered properly via blob URL)
+            const clickAction = isTextSubmission
+                ? `viewTextAdmin(event, '${previewDataUrl}')`
+                : (previewDataUrl ? `window.open('${previewDataUrl}', '_blank')` : "alert('File preview tidak tersedia')");
 
             const noteButton = noteUrl ? `<button onclick="event.stopPropagation(); window.open('${noteUrl}', '_blank')" class="mt-2 text-xs bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg w-full flex items-center justify-center gap-1.5 transition-colors border border-primary/20"><span class="material-symbols-outlined text-[14px]">description</span> Lihat Catatan</button>` : '';
 
             const deleteButton = `<button onclick="deleteAdminFile(event, this, '${fullFileName}')" class="absolute top-3 right-3 bg-red-500/20 hover:bg-red-500/80 text-red-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-red-500/30 hover:border-red-500" title="Hapus File"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
-            const isTextSubmission = type === 'text/html' || name.endsWith('.html') || (type === 'text/plain' && name.endsWith('.txt') && !name.endsWith('_note.txt'));
             const downloadDocxBtn = isTextSubmission ? `<button onclick="downloadDocxAdmin(event, '${previewDataUrl}', '${escapedName}')" class="absolute top-3 right-[48px] bg-green-500/20 hover:bg-green-500/80 text-green-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-green-500/30 hover:border-green-500" title="Download Word"><span class="material-symbols-outlined text-[18px]">description</span></button>` : '';
 
             const card = `
@@ -331,6 +334,26 @@
                 await showCustomModal('error', 'Terjadi Kesalahan', err.message);
                 button.innerHTML = originalHtml;
                 button.disabled = false;
+            }
+        }
+
+        async function viewTextAdmin(event, url) {
+            event.stopPropagation();
+            try {
+                const cacheBustedUrl = url + '?t=' + Date.now();
+                const response = await fetch(cacheBustedUrl, { cache: 'no-store' });
+                const html = await response.text();
+                // Create a proper blob with text/html type so browser renders it correctly
+                const blob = new Blob([html], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const newWin = window.open(blobUrl, '_blank');
+                // Revoke the blob URL after the window has a chance to load
+                if (newWin) {
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                }
+            } catch (e) {
+                console.error('Gagal membuka file:', e);
+                alert('Gagal membuka file teks.');
             }
         }
 

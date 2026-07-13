@@ -715,9 +715,11 @@
             const escapedName = name.replace(/'/g, "\\'");
             const noteHtml = note ? `<div class="mt-2 text-xs text-on-surface-variant bg-[rgba(255,255,255,0.05)] p-2 rounded border border-[rgba(255,255,255,0.05)]">${note}</div>` : '';
 
+            const isTextCard = (type === 'text/html' || name.endsWith('.html') || (type === 'text/plain' && name.endsWith('.txt') && !name.endsWith('_note.txt')));
+
             const newHistoryCard = `
         <div class="glass-card p-4 sm:p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer w-full"
-            style="background: rgba(255, 255, 255, 0.05);" onclick="loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')">
+            style="background: rgba(255, 255, 255, 0.05);" onclick="${isTextCard ? `viewText(event, '${previewDataUrl}')` : `loadHistoryToPreview('${escapedName}', '${size}', '${type}', '${previewDataUrl}')`}">
             <div class="flex items-start gap-3 sm:gap-4 w-full">
                 <div class="w-10 h-10 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary-fixed-dim relative">
                     ${type.includes('image') && previewDataUrl
@@ -947,6 +949,24 @@
                 btn.textContent = originalText;
             }
         });
+
+        async function viewText(event, url) {
+            event.stopPropagation();
+            try {
+                const cacheBustedUrl = url + '?t=' + Date.now();
+                const response = await fetch(cacheBustedUrl, { cache: 'no-store' });
+                const html = await response.text();
+                const blob = new Blob([html], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const newWin = window.open(blobUrl, '_blank');
+                if (newWin) {
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                }
+            } catch (e) {
+                console.error('Gagal membuka file:', e);
+                alert('Gagal membuka file teks.');
+            }
+        }
 
         async function editSubmission(event, url, id) {
             event.stopPropagation();

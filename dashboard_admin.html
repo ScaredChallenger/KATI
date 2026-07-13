@@ -303,11 +303,11 @@
                     filesToRemove.push(`${nim}_${timestamp}_note.txt`);
                 }
 
-                const { error } = await supabaseClient.storage.from('certificates').remove(filesToRemove);
+                const { data, error } = await supabaseClient.storage.from('certificates').remove(filesToRemove);
 
-                if (error) {
-                    console.error("Gagal menghapus:", error);
-                    await showCustomModal('error', 'Gagal Menghapus', "Pesan Error: " + error.message + ". Pastikan Policy DELETE sudah diatur di Supabase Storage.");
+                if (error || !data || data.length === 0) {
+                    console.error("Gagal menghapus:", error || "File tidak ditemukan atau akses ditolak RLS");
+                    await showCustomModal('error', 'Gagal Menghapus', "Pesan Error: " + (error ? error.message : "Akses ditolak atau file tidak ada.") + " Pastikan Policy DELETE sudah diatur di Supabase Storage.");
                     button.innerHTML = originalHtml;
                     button.disabled = false;
                 } else {
@@ -371,6 +371,34 @@
             }
         }
 
+        async function getAllFilesFromSupabase(bucket, path = '') {
+            if (!supabaseClient) return [];
+            try {
+                const { data, error } = await supabaseClient.storage.from(bucket).list(path);
+                if (error || !data) return [];
+                
+                let allFiles = [];
+                for (const item of data) {
+                    if (item.name === '.emptyFolderPlaceholder') continue;
+                    
+                    const fullPath = path === '' ? item.name : `${path}/${item.name}`;
+                    
+                    // Folder have id === null in Supabase storage
+                    if (item.id === null) { 
+                        const subFiles = await getAllFilesFromSupabase(bucket, fullPath);
+                        allFiles = allFiles.concat(subFiles);
+                    } else { 
+                        item.fullPath = fullPath;
+                        allFiles.push(item);
+                    }
+                }
+                return allFiles;
+            } catch (e) {
+                console.error("Error fetching files at path:", path, e);
+                return [];
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             // Check admin session
             const adminName = localStorage.getItem('admin_name');
@@ -401,61 +429,60 @@
 
             if (supabaseClient) {
                 try {
-                    const { data: files, error } = await supabaseClient.storage.from('certificates').list();
+                    const files = await getAllFilesFromSupabase('certificates');
                     if (files && files.length > 0) {
-                        const validFiles = files.filter(f => f.name !== '.emptyFolderPlaceholder');
-                        if (validFiles.length > 0) {
-                            hasFiles = true;
+                        hasFiles = true;
 
-                            // Separate notes and main files
-                            const notes = {};
-                            const mainFiles = [];
+                        // Separate notes and main files
+                        const notes = {};
+                        const mainFiles = [];
 
-                            validFiles.forEach(file => {
-                                if (file.name.endsWith('_note.txt')) {
-                                    const parts = file.name.split('_');
-                                    if (parts.length >= 2) {
-                                        const nim = parts[0];
-                                        const ts = parts[1];
-                                        notes[`${nim}_${ts}`] = file;
-                                    }
-                                } else {
-                                    mainFiles.push(file);
-                                }
-                            });
-
-                            // Sort by created_at desc
-                            mainFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-                            for (const file of mainFiles) {
-                                let uNim = 'Unknown';
-                                let actualName = file.name;
-                                let noteUrl = null;
-
-                                const parts = file.name.split('_');
-                                if (parts.length >= 3 && parts[0].length === 8 && !isNaN(parts[0])) {
-                                    uNim = parts[0];
+                        files.forEach(file => {
+                            const nameToParse = file.fullPath.split('/').pop();
+                            if (nameToParse.endsWith('_note.txt')) {
+                                const parts = nameToParse.split('_');
+                                if (parts.length >= 2) {
+                                    const nim = parts[0];
                                     const ts = parts[1];
-                                    actualName = parts.slice(2).join('_');
-
-                                    if (notes[`${uNim}_${ts}`]) {
-                                        const { data: noteUrlData } = supabaseClient.storage.from('certificates').getPublicUrl(notes[`${uNim}_${ts}`].name);
-                                        noteUrl = noteUrlData.publicUrl;
-                                    }
-                                } else if (parts.length >= 2 && !isNaN(parts[0])) {
-                                    actualName = parts.slice(1).join('_');
+                                    notes[`${nim}_${ts}`] = file;
                                 }
-
-                                const studentName = studentMap[uNim] || 'Unknown Student';
-                                const sizeMB = (file.metadata?.size / (1024 * 1024)).toFixed(2) || '0.00';
-                                const date = new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-                                const type = file.metadata?.mimetype || 'application/octet-stream';
-
-                                const { data: urlData } = supabaseClient.storage.from('certificates').getPublicUrl(file.name);
-                                const previewDataUrl = urlData.publicUrl;
-
-                                renderFileCard(actualName, sizeMB, date, type, previewDataUrl, uNim, studentName, noteUrl, file.name);
+                            } else {
+                                mainFiles.push(file);
                             }
+                        });
+
+                        // Sort by created_at desc
+                        mainFiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                        for (const file of mainFiles) {
+                            let uNim = 'Unknown';
+                            const originalFileName = file.fullPath.split('/').pop();
+                            let actualName = originalFileName;
+                            let noteUrl = null;
+
+                            const parts = originalFileName.split('_');
+                            if (parts.length >= 3 && parts[0].length === 8 && !isNaN(parts[0])) {
+                                uNim = parts[0];
+                                const ts = parts[1];
+                                actualName = parts.slice(2).join('_');
+
+                                if (notes[`${uNim}_${ts}`]) {
+                                    const { data: noteUrlData } = supabaseClient.storage.from('certificates').getPublicUrl(notes[`${uNim}_${ts}`].fullPath);
+                                    noteUrl = noteUrlData.publicUrl;
+                                }
+                            } else if (parts.length >= 2 && !isNaN(parts[0])) {
+                                actualName = parts.slice(1).join('_');
+                            }
+
+                            const studentName = studentMap[uNim] || 'Unknown Student';
+                            const sizeMB = (file.metadata?.size / (1024 * 1024)).toFixed(2) || '0.00';
+                            const date = new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                            const type = file.metadata?.mimetype || 'application/octet-stream';
+
+                            const { data: urlData } = supabaseClient.storage.from('certificates').getPublicUrl(file.fullPath);
+                            const previewDataUrl = urlData.publicUrl;
+
+                            renderFileCard(actualName, sizeMB, date, type, previewDataUrl, uNim, studentName, noteUrl, file.fullPath);
                         }
                     }
                 } catch (err) {

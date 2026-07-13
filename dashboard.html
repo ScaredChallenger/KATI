@@ -321,9 +321,15 @@
                         <span id="file-preview-icon"
                             class="material-symbols-outlined text-[80px] text-primary mb-4 hidden"
                             style="font-variation-settings: 'FILL' 1;">description</span>
-                        <p id="file-preview-name"
-                            class="font-headline-md text-headline-md text-on-surface text-center truncate w-full px-4 max-w-[300px]">
-                        </p>
+                        <!-- Editable filename -->
+                        <div class="flex items-center gap-2 group/name w-full justify-center px-4 max-w-[320px]" onclick="event.stopPropagation()">
+                            <input id="file-preview-name"
+                                class="font-headline-md text-headline-md text-on-surface text-center bg-transparent border-b border-transparent hover:border-[rgba(255,255,255,0.3)] focus:border-primary focus:outline-none w-full truncate transition-all duration-200 cursor-text"
+                                title="Klik untuk mengganti nama file"
+                                placeholder="Nama file..."
+                            >
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-0 group-hover/name:opacity-60 transition-opacity pointer-events-none flex-shrink-0">edit</span>
+                        </div>
                         <p id="file-preview-size"
                             class="font-body-md text-body-md text-on-surface-variant text-center opacity-70 mt-1 mb-6">
                         </p>
@@ -403,6 +409,16 @@
                 <p class="font-body-md text-body-md text-on-surface-variant mt-1">Kirimkan esai, teks mandiri, atau tautan Anda di sini.</p>
             </div>
             <div class="glass-card flex flex-col" style="background: rgba(255, 255, 255, 0.03);">
+                <!-- Title input -->
+                <div class="px-4 pt-4 pb-2 border-b border-[rgba(255,255,255,0.07)]">
+                    <input
+                        id="text-submission-title"
+                        type="text"
+                        placeholder="📄 Judul / Nama File (opsional)..."
+                        class="w-full bg-transparent text-on-surface font-headline-sm text-headline-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-0"
+                        maxlength="80"
+                    >
+                </div>
                 <div id="editor-container" style="min-height: 200px; border-bottom: none !important;"></div>
                 <div class="p-4 border-t border-[rgba(255,255,255,0.1)] flex items-center justify-end gap-3 bg-[rgba(255,255,255,0.01)] rounded-b-[24px]">
                     <span id="text-edit-indicator" class="text-primary font-label-sm text-label-sm mr-auto hidden flex items-center gap-2">
@@ -511,11 +527,19 @@
 
                 // Bersihkan nama file dari spasi dan karakter aneh agar aman sebagai URL
                 const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                // Gunakan nama kustom jika ada (dari input edit nama file di preview)
+                const customName = (document.getElementById('file-preview-name')?.value || '').trim();
                 const userNim = localStorage.getItem('user_nim') || '00000000';
                 const fileTimestamp = Date.now();
                 const fileExtension = safeFileName.split('.').pop().toUpperCase();
                 const fileTypeFolder = fileExtension ? fileExtension : 'UNKNOWN';
-                const filePath = `${userNim}/${fileTypeFolder}/${userNim}_${fileTimestamp}_${safeFileName}`;
+                // Jika user isi nama kustom, gabungkan dengan ekstensi asli
+                let finalFileName = safeFileName;
+                if (customName) {
+                    const ext = safeFileName.includes('.') ? '.' + safeFileName.split('.').pop() : '';
+                    finalFileName = customName.replace(/[^a-zA-Z0-9.\-_ ]/g, '_').replace(/ /g, '_') + ext;
+                }
+                const filePath = `${userNim}/${fileTypeFolder}/${userNim}_${fileTimestamp}_${finalFileName}`;
 
                 const { data, error } = await supabaseClient.storage
                     .from('certificates')
@@ -610,7 +634,7 @@
             const imgEl = document.getElementById('file-preview-img');
             const iconEl = document.getElementById('file-preview-icon');
 
-            nameEl.textContent = file.name;
+            nameEl.value = file.name; // Set sebagai value input (editable)
             sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
 
             if (file.type.startsWith('image/')) {
@@ -773,7 +797,7 @@
             const imgEl = document.getElementById('file-preview-img');
             const iconEl = document.getElementById('file-preview-icon');
 
-            nameEl.textContent = name;
+            nameEl.value = name; // Set sebagai value input (editable)
             sizeEl.textContent = size + " MB";
 
             if (type.includes('image') && previewDataUrl) {
@@ -891,6 +915,8 @@
             document.getElementById('text-edit-indicator').classList.add('hidden');
             document.getElementById('cancel-edit-text-btn').classList.add('hidden');
             document.getElementById('submit-text-btn').textContent = "Kirim Teks";
+            const titleInput = document.getElementById('text-submission-title');
+            if (titleInput) titleInput.value = '';
         });
 
         document.getElementById('submit-text-btn').addEventListener('click', async () => {
@@ -910,10 +936,19 @@
                 const userNim = localStorage.getItem('user_nim') || '00000000';
                 const fileTimestamp = Date.now();
                 
+                // Ambil judul dari input (jika ada)
+                const titleInput = document.getElementById('text-submission-title');
+                const customTitle = (titleInput ? titleInput.value.trim() : '') || '';
+                const safeTitle = customTitle ? customTitle.replace(/[^a-zA-Z0-9\-_ ]/g, '').replace(/ /g, '_') : '';
+                const baseFileName = safeTitle ? safeTitle + '.html' : `TextSubmission_${fileTimestamp}.html`;
+
                 // Gunakan path lama jika mode edit, atau buat baru jika bukan
-                let filePath = currentEditingFilePath || `${userNim}/TXT/${userNim}_${fileTimestamp}_TextSubmission.html`;
+                let filePath = currentEditingFilePath || `${userNim}/TXT/${userNim}_${fileTimestamp}_${baseFileName}`;
+                const displayName = safeTitle ? (safeTitle + '.html') : ("Teks_Esai_" + fileTimestamp + ".html");
                 
-                const htmlContent = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Text Submission</" + "title></" + "head><body style=\"font-family: sans-serif; padding: 20px;\">" + quillHtml + "</" + "body></" + "html>";
+                const htmlTitle = customTitle || 'Text Submission';
+                
+                const htmlContent = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" + htmlTitle + "</" + "title></" + "head><body style=\"font-family: sans-serif; padding: 20px;\">" + quillHtml + "</" + "body></" + "html>";
                 const blob = new Blob([htmlContent], { type: 'text/html' });
 
                 const { error } = await supabaseClient.storage
@@ -937,8 +972,9 @@
                     // Buat history card baru
                     const fileSizeMB = (blob.size / (1024 * 1024)).toFixed(4);
                     const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-                    injectCardToHistory("Teks_Esai_" + fileTimestamp + ".html", fileSizeMB, currentDate, "text/html", urlData.publicUrl, null, true, "");
+                    injectCardToHistory(displayName, fileSizeMB, currentDate, "text/html", urlData.publicUrl, null, true, "");
                     quill.root.innerHTML = '';
+                    if (titleInput) titleInput.value = '';
                 }
             } catch (err) {
                 console.error("Gagal mengirim teks:", err);

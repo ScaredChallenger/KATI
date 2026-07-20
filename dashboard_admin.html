@@ -252,12 +252,12 @@
             const noteButton = noteUrl ? `<button onclick="event.stopPropagation(); window.open('${noteUrl}', '_blank')" class="mt-2 text-xs bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg w-full flex items-center justify-center gap-1.5 transition-colors border border-primary/20"><span class="material-symbols-outlined text-[14px]">description</span> Lihat Catatan</button>` : '';
 
             const deleteButton = `<button onclick="deleteAdminFile(event, this, '${fullFileName}')" class="absolute top-3 right-3 bg-red-500/20 hover:bg-red-500/80 text-red-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-red-500/30 hover:border-red-500" title="Hapus File"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
-            const downloadDocxBtn = isTextSubmission ? `<button onclick="downloadDocxAdmin(event, '${previewDataUrl}', '${escapedName}')" class="absolute top-3 right-[48px] bg-green-500/20 hover:bg-green-500/80 text-green-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-green-500/30 hover:border-green-500" title="Download Word"><span class="material-symbols-outlined text-[18px]">description</span></button>` : '';
+            const downloadBtn = previewDataUrl ? `<button onclick="downloadFileAdmin(event, '${previewDataUrl}', '${escapedName}')" class="absolute top-3 right-[48px] bg-green-500/20 hover:bg-green-500/80 text-green-400 hover:text-white rounded-lg p-2 flex items-center justify-center transition-colors z-10 border border-green-500/30 hover:border-green-500" title="Download File"><span class="material-symbols-outlined text-[18px]">download</span></button>` : '';
 
             const card = `
             <div class="glass-card file-card p-5 hover:border-[rgba(255,255,255,0.3)] transition-all duration-300 group cursor-pointer flex flex-col gap-4 relative"
                 style="background: rgba(255, 255, 255, 0.05);" onclick="${clickAction}" data-name="${name.toLowerCase()}" data-nim="${safeNim.toLowerCase()}" data-studentname="${safeStudentName.toLowerCase()}">
-                ${downloadDocxBtn}
+                ${downloadBtn}
                 ${deleteButton}
                 
                 <div class="w-full h-32 rounded-lg overflow-hidden bg-primary-container/20 flex items-center justify-center relative">
@@ -357,39 +357,29 @@
             }
         }
 
-        async function downloadDocxAdmin(event, url, filename) {
+        async function downloadFileAdmin(event, url, filename) {
             event.stopPropagation();
             const btn = event.currentTarget;
             const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>`;
             
             try {
-                // Tambahkan cache-buster agar selalu mengambil versi terbaru
-                const cacheBustedUrl = url + '?t=' + Date.now();
-                const response = await fetch(cacheBustedUrl, { cache: 'no-store' });
-                const html = await response.text();
-                
-                const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<(\/body)>/i);
-                const content = bodyMatch ? bodyMatch[1] : html;
-
-                const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Doc</title></head><body>";
-                const postHtml = "<" + "/body><" + "/html>";
-                const fullHtml = preHtml + content + postHtml;
-
-                const blob = new Blob(['\\ufeff', fullHtml], { type: 'application/msword' });
+                const response = await fetch(url + '?t=' + Date.now(), { cache: 'no-store' });
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const blob = await response.blob();
                 
                 const downloadLink = document.createElement("a");
                 document.body.appendChild(downloadLink);
-                downloadLink.href = URL.createObjectURL(blob);
-                
-                const safeFilename = filename.replace('.html', '').replace(/[^a-zA-Z0-9_-]/g, '_') + '.doc';
-                downloadLink.download = safeFilename;
+                const objectUrl = URL.createObjectURL(blob);
+                downloadLink.href = objectUrl;
+                downloadLink.download = filename;
                 
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(objectUrl);
             } catch (e) {
-                console.error("Gagal mendownload DOC:", e);
-                await showCustomModal('error', 'Gagal Mendownload', 'Terjadi kesalahan saat mengonversi file ke format DOC.');
+                console.error("Gagal mendownload file:", e);
+                await showCustomModal('error', 'Gagal Mendownload', 'Terjadi kesalahan saat mendownload file.');
             } finally {
                 btn.innerHTML = originalHtml;
             }
